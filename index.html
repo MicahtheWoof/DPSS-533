@@ -273,6 +273,15 @@ textarea:focus,select:focus{outline:none;box-shadow:0 -3px 0 0 var(--gold),0 3px
 .chk{font-size:12px;color:var(--dim);display:flex;align-items:center;gap:8px;cursor:pointer}
 .chk input{width:16px;height:16px;accent-color:var(--gold)}
 .headcard{--c:#c94f6d}
+
+.tt th.pt{text-align:left;white-space:nowrap;padding-right:6px;width:1%}
+.tt th.pt b{font-weight:400;color:var(--ink);margin-right:6px}
+.tt td{padding:2px;font-size:12px}
+.tt.edit .cell{width:100%;min-height:26px;border:0;background:var(--panel2);color:var(--dim);font-size:12px;padding:3px 2px;cursor:pointer}
+.tt.edit .cell.at{background:#2f2a58;color:var(--ink)}.tt.edit .cell.cls{background:#3a2238;color:#ff9a9a}
+.tt.edit .cell:hover{outline:2px solid var(--gold);outline-offset:-2px}
+.brush .chip{min-width:0;padding:4px 10px}
+.brush .chip.b-cls span{color:#ff9a9a}.brush .chip.b-clr span{color:var(--dim)}
 </style>
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
@@ -337,8 +346,9 @@ let SECTS={
   yf:{n:'永富仙宗',motto:'永歷千秋傳道脈，富擁萬法聚仙靈。',color:'#c94f6d',schools:['pqs','aqs','raman'],head:{n:'永富副校長',title:'宗主',spec:'',contact:'',look:{hair:'#4a4a58',robe:'#8a2a44',glass:true,belt:'#f2c14e'}}},
   xc:{n:'興弛聖宗',motto:'馳騁萬界悟真道，威震諸天興聖宗。',color:'#3a7bd5',schools:['pqs','aqs','raman'],head:{n:'興弛教授',title:'宗主',spec:'',contact:'',look:{hair:'#2a2a38',robe:'#1f4a8a',bun:true,belt:'#f2c14e'}}}
 };
-// 課表的時段：sched 寫成 {"1":{"am":"lab","pm":"class"}}，值可以是地點 id、"class"（上課）或空白（不在）
-const PERIODS=[{k:'am',n:'上午'},{k:'pm',n:'下午'},{k:'ev',n:'晚上'}];
+// 課表的節次：sched 寫成 {"1":{"p1":"class","p2":"lab"}}，"1" 是週一、p1 是第 1 節；值可以是地點 id、"class"（上課）或空白（不在）
+let PERIODS=[['08:00','08:50'],['09:00','09:50'],['10:10','11:00'],['11:10','12:00'],['12:20','13:10'],['13:20','14:10'],['14:20','15:10'],
+  ['15:30','16:20'],['16:30','17:20'],['17:30','18:20'],['18:30','19:20'],['19:30','20:20'],['20:30','21:20'],['21:30','22:20']].map(([s,e],i)=>({k:'p'+(i+1),n:String(i+1),s,e}));
 // 地點：floor 樓層（不填就是「校外」）；group 會框在一起；lab 有光學桌；study 可以自修；tables 是實驗桌與庫存（待補）
 let PLACES={
   big:{n:'大間休息室',d:'人最多，午餐時間特別熱鬧。',art:'lounge',floor:5,group:'休息室'},
@@ -401,7 +411,7 @@ rebuild();
 /* ---- 內容匯出／匯入（存在 Firestore 的 config/content，只有登入的人讀得到） ---- */
 function exportContent(){
   const strip=o=>JSON.parse(JSON.stringify(o,(k,v)=>['need','schools','by'].includes(k)?undefined:v));
-  return {sects:SECTS,semester:SEMESTER,ranks:RANKS,realms:REALMS,mind:MIND,books:BOOKS,places:strip(PLACES),schools:strip(SCHOOLS),skills:strip(SKILLS),masters:strip(MASTERS)};}
+  return {sects:SECTS,periods:PERIODS,semester:SEMESTER,ranks:RANKS,realms:REALMS,mind:MIND,books:BOOKS,places:strip(PLACES),schools:strip(SCHOOLS),skills:strip(SKILLS),masters:strip(MASTERS)};}
 function checkContent(c){const e=[];
   if(!c||typeof c!=='object')return['不是 JSON 物件'];
   for(const k of['places','schools','skills','masters'])if(!c[k])e.push('缺少 '+k);
@@ -420,7 +430,7 @@ function checkContent(c){const e=[];
   return e;}
 function applyContent(c){PLACES=c.places;SCHOOLS=c.schools;SKILLS=c.skills.map(s=>({pre:[],reading:[],...s}));MASTERS=c.masters.map(m=>({sched:{},teach:[],...m}));
   if(c.semester)SEMESTER=c.semester;if(Array.isArray(c.ranks)&&c.ranks.length)RANKS=c.ranks;if(Array.isArray(c.realms)&&c.realms.length)REALMS=c.realms;
-  if(c.mind)MIND=c.mind;if(c.sects&&typeof c.sects==='object')SECTS=c.sects;if(Array.isArray(c.books)&&c.books.length)BOOKS=c.books;rebuild();}
+  if(c.mind)MIND=c.mind;if(c.sects&&typeof c.sects==='object')SECTS=c.sects;if(Array.isArray(c.periods)&&c.periods.length)PERIODS=c.periods;if(Array.isArray(c.books)&&c.books.length)BOOKS=c.books;rebuild();}
 
 const PX={k:'#1a1226',e:'#1a1226',w:'#f4efe1',g:'#7fe7ff',v:'#7fb2ff',t:'#c0392b'};
 const BODY=["....kkkk....","...khhhhk...","..khhhhhhk..","..khsssshk..","..ksessesk..","..kssssssk..","...kssssk...","..krrrrrrk..",
@@ -577,11 +587,17 @@ const myRank=()=>RANKS.find(r=>r.n===ROSTER.rank)||null;
 const mySchool=()=>ROSTER.school&&SCHOOLS[ROSTER.school]?ROSTER.school:S.school;
 const mySect=()=>ROSTER.sect&&SECTS[ROSTER.sect]?ROSTER.sect:(S.sect&&SECTS[S.sect]?S.sect:null);
 /* ---- 課表與人物 ---- */
-const periodNow=()=>{const hr=today().getHours();return hr<12?'am':hr<18?'pm':'ev';};
-const periodName=k=>(PERIODS.find(p=>p.k===k)||{}).n||'';
-function slot(m,d,p){const v=(m.sched||{})[d];if(v==null)return'';if(typeof v==='string')return p==='ev'?'':v;return v[p]||'';}
+const toMin=t=>{const [a,b]=String(t).split(':').map(Number);return a*60+(b||0);};
+const nowMin=()=>{const d=today();return d.getHours()*60+d.getMinutes();};
+function periodNow(){const t=nowMin();if(!PERIODS.length||t<toMin(PERIODS[0].s)||t>=toMin(PERIODS[PERIODS.length-1].e))return null;
+  let k=PERIODS[0].k;PERIODS.forEach(p=>{if(toMin(p.s)<=t)k=p.k;});return k;}
+const periodOf=k=>PERIODS.find(p=>p.k===k);
+const periodName=k=>{const p=periodOf(k);return p?`第${p.n}節`:'';};
+const legacyOf=k=>{const i=PERIODS.findIndex(p=>p.k===k);return i<4?'am':i<9?'pm':'ev';};
+function slot(m,d,p){if(!p)return'';const v=(m.sched||{})[d];if(v==null)return'';if(typeof v==='string')return legacyOf(p)==='ev'?'':v;if(p in v)return v[p]||'';return v[legacyOf(p)]||'';}
 function placesOf(m){const r=new Set();for(let d=1;d<=5;d++)PERIODS.forEach(p=>{const v=slot(m,d,p.k);if(v&&v!=='class')r.add(v);});return r;}
-function slotsAt(m,k){const out=[];for(let d=1;d<=5;d++)PERIODS.forEach(p=>{if(slot(m,d,p.k)===k)out.push(DAYS[d].slice(1)+p.n);});return out;}
+function slotsAt(m,k){const out=[];for(let d=1;d<=5;d++){let run=null;const flush=()=>{if(run){out.push(`${DAYS[d].slice(1)} ${run.s}–${run.e}`);run=null;}};
+    PERIODS.forEach(p=>{if(slot(m,d,p.k)===k){if(run)run.e=p.e;else run={s:p.s,e:p.e};}else flush();});flush();}return out;}
 let PROFILES={},UID=null,PREF=null,pfilter='all';
 function PEOPLE(){
   const heads=Object.keys(SECTS).filter(k=>SECTS[k].head).map(k=>{const H=SECTS[k].head;return{id:'head_'+k,n:H.n,role:H.title||'宗主',sect:k,teach:H.teach||[],sched:H.sched||{},spec:H.spec,contact:H.contact,prep:H.prep,look:H.look||TEACHER};});
@@ -592,10 +608,14 @@ const personById=id=>PEOPLE().find(m=>m.id===id);
 const teachersOf=id=>PEOPLE().filter(m=>(m.teach||[]).includes(id));
 const hereNow=k=>PEOPLE().filter(m=>slot(m,weekday(),periodNow())===k);
 const slotText=v=>v==='class'?'上課':v?(PLACES[v]?placeShort(v):v):'—';
-const nowText=m=>{const v=slot(m,weekday(),periodNow());return `現在（${DAYS[weekday()]}${periodName(periodNow())}）：${v==='class'?'上課中':v?(PLACES[v]?PLACES[v].n:v):'不在實驗室'}`;};
-function schedGrid(m){const t=h('table',{class:'tt'},h('thead',{},h('tr',{},h('th',{},''),...[1,2,3,4,5].map(d=>h('th',{class:d===weekday()?'today':null},DAYS[d].slice(1))))));
-  const tb=h('tbody');PERIODS.forEach(p=>tb.append(h('tr',{},h('th',{},p.n),...[1,2,3,4,5].map(d=>{const v=slot(m,d,p.k);
-    return h('td',{class:(v==='class'?'cls':v?'at':'')+(d===weekday()&&p.k===periodNow()?' now':'')},slotText(v));}))));
+const hhmm=()=>{const d=today();return `${String(d.getHours()).padStart(2,'0')}:${String(d.getMinutes()).padStart(2,'0')}`;};
+const nowLabel=()=>{const p=periodNow();return `${DAYS[weekday()]} ${p?periodName(p)+' ':''}${hhmm()}`;};
+const nowText=m=>{const p=periodNow();if(!p||weekday()<1||weekday()>5)return `現在（${nowLabel()}）不在課表時段`;const v=slot(m,weekday(),p);
+  return `現在（${nowLabel()}）：${v==='class'?'上課中':v?(PLACES[v]?PLACES[v].n:v):'不在實驗室'}`;};
+function schedGrid(m){const pn=periodNow(),wd=weekday();
+  const t=h('table',{class:'tt'},h('thead',{},h('tr',{},h('th',{},'節次'),...[1,2,3,4,5].map(d=>h('th',{class:d===wd?'today':null},DAYS[d].slice(1))))));
+  const tb=h('tbody');PERIODS.forEach(p=>tb.append(h('tr',{},h('th',{class:'pt'},h('b',{},p.n),h('span',{},p.s)),...[1,2,3,4,5].map(d=>{const v=slot(m,d,p.k);
+    return h('td',{class:(v==='class'?'cls':v?'at':'')+(d===wd&&p.k===pn?' now':'')},slotText(v));}))));
   t.append(tb);return h('div',{style:'overflow-x:auto'},t);}
 function personTag(m){const t=[];if(m.role)t.push(h('span',{class:'tag '+(m.role==='師兄姐'?'share':m.role==='宗主'?'head':'')},m.role));
   if(m.sect&&SECTS[m.sect])t.push(h('span',{class:'tag'},SECTS[m.sect].n));
@@ -696,17 +716,25 @@ function renderSeniorBox(){
     h('div',{class:'chips'},...SKILLS.map(s=>h('button',{class:'chip'+(teach.has(s.id)?' on':''),'aria-pressed':String(teach.has(s.id)),
       onclick:()=>{teach.has(s.id)?teach.delete(s.id):teach.add(s.id);S.prof={...(S.prof||{}),teach:[...teach]};save();publish();render();}},h('span',{},(learned(s.id)?'✓ ':'')+s.n)))));
   return box;}
+let BRUSH='class',pubTimer=null;
+const publishSoon=()=>{clearTimeout(pubTimer);pubTimer=setTimeout(publish,800);};
 function renderMySched(){
-  const box=h('section',{class:'box'},h('h2',{},'我的課表',h('em',{},'每個時段在哪裡，或在上課')));
-  const t=h('table',{class:'tt edit'},h('thead',{},h('tr',{},h('th',{},''),...[1,2,3,4,5].map(d=>h('th',{},DAYS[d].slice(1))))));
+  const box=h('section',{class:'box'},h('h2',{},'我的課表',h('em',{},'先選標籤，再點格子填上去')));
+  const brushes=[['class','上課'],...Object.keys(PLACES).map(k=>[k,placeShort(k)||PLACES[k].n]),['','清除']];
+  const bar=h('div',{class:'chips brush'},...brushes.map(([k,n])=>h('button',{class:'chip'+(BRUSH===k?' on':'')+(k==='class'?' b-cls':k===''?' b-clr':''),'aria-pressed':String(BRUSH===k),
+    onclick:e=>{BRUSH=k;box.querySelectorAll('.brush .chip').forEach(c=>{c.classList.remove('on');c.setAttribute('aria-pressed','false');});e.currentTarget.classList.add('on');e.currentTarget.setAttribute('aria-pressed','true');}},h('span',{},n))));
+  const t=h('table',{class:'tt edit'},h('thead',{},h('tr',{},h('th',{},'節次'),...[1,2,3,4,5].map(d=>h('th',{},DAYS[d].slice(1))))));
   const tb=h('tbody');
-  PERIODS.forEach(p=>tb.append(h('tr',{},h('th',{},p.n),...[1,2,3,4,5].map(d=>{const cur=slot({sched:S.sched||{}},d,p.k);
-    const sel=h('select',{'aria-label':DAYS[d]+p.n},h('option',{value:''},'—'),h('option',{value:'class',selected:cur==='class'?'':null},'上課'),
-      ...Object.keys(PLACES).map(k=>h('option',{value:k,selected:cur===k?'':null},placeShort(k)||PLACES[k].n)));
-    sel.onchange=()=>{const sc={...(S.sched||{})};sc[d]={...(sc[d]&&typeof sc[d]==='object'?sc[d]:{}),[p.k]:sel.value};S.sched=sc;save();publish();};
-    return h('td',{},sel);}))));
+  const cls=v=>'cell'+(v==='class'?' cls':v?' at':'');
+  PERIODS.forEach(p=>tb.append(h('tr',{},h('th',{class:'pt'},h('b',{},p.n),h('span',{},`${p.s}–${p.e}`)),...[1,2,3,4,5].map(d=>{
+    const cur=slot({sched:S.sched||{}},d,p.k);
+    const b=h('button',{class:cls(cur),'aria-label':`${DAYS[d]} 第${p.n}節`},slotText(cur));
+    b.onclick=()=>{const sc={...(S.sched||{})};sc[d]={...(sc[d]&&typeof sc[d]==='object'?sc[d]:{}),[p.k]:BRUSH};S.sched=sc;b.className=cls(BRUSH);b.textContent=slotText(BRUSH);save();publishSoon();};
+    return h('td',{},b);}))));
   t.append(tb);
-  box.append(h('div',{style:'overflow-x:auto'},t),
+  const copyMon=h('button',{class:'link',onclick:()=>{const sc={...(S.sched||{})};const mon={};PERIODS.forEach(p=>{mon[p.k]=slot({sched:S.sched||{}},1,p.k);});for(let d=2;d<=5;d++)sc[d]={...mon};S.sched=sc;save();publishSoon();render();}},'把週一複製到週二～週五');
+  const clearAll=h('button',{class:'link',onclick:()=>{S.sched={};save();publishSoon();render();}},'全部清除');
+  box.append(bar,h('div',{style:'overflow-x:auto'},t),h('div',{class:'row'},copyMon,clearAll),
     S.senior?h('p',{class:'muted'},'你是師兄姐，課表會公開給同門。'):
       h('label',{class:'chk',for:'pubchk'},h('input',{type:'checkbox',id:'pubchk',checked:S.pub?'':null,onchange:e=>{S.pub=e.target.checked;save();publish();render();}}),'讓同門看到我的課表（方便大家找人）'));
   return box;}
@@ -794,7 +822,7 @@ function renderLib(){
 
 /* ===================== 地圖與房間 ===================== */
 function renderMapView(){
-  const box=h('section',{class:'box'},h('h2',{},'地圖',h('em',{},`房間下方是現在（${DAYS[weekday()]}${periodName(periodNow())}）依課表在那裡的人`)));
+  const box=h('section',{class:'box'},h('h2',{},'地圖',h('em',{},`房間下方是現在（${nowLabel()}）依課表在那裡的人`)));
   const fl=p=>p.floor==null||p.floor===''?'校外':p.floor;
   const floors=[...new Set(Object.values(PLACES).map(fl))].sort((a,b)=>(a==='校外')-(b==='校外')||b-a);
   const tile=k=>{const P=PLACES[k];const who=hereNow(k);
@@ -992,7 +1020,7 @@ else{
     $('tab-admin').hidden=!ADMIN;
     if(ADMIN){UNSUB.push(FS.collection('players').onSnapshot(q=>{PLAYERS=q.docs.map(x=>({id:x.id,d:x.data()}));if(view==='admin')render();},()=>{}));
       UNSUB.push(FS.collection('roster').onSnapshot(q=>{q.docs.forEach(x=>{ROSTERS[x.id]=x.data();});if(view==='admin')render();},()=>{}));}
-    UNSUB.push(FS.collection('profiles').onSnapshot(q=>{PROFILES={};q.docs.forEach(x=>{PROFILES[x.id]=x.data();});if(['map','room','master','skill','admin','me'].includes(view)&&!document.activeElement.closest('textarea,select'))render();},()=>{}));
+    UNSUB.push(FS.collection('profiles').onSnapshot(q=>{PROFILES={};q.docs.forEach(x=>{PROFILES[x.id]=x.data();});if(['map','room','master','skill','admin'].includes(view)&&!document.activeElement.closest('textarea,select'))render();},()=>{}));
     $('gate').hidden=true;$('app').hidden=false;
     if(!S.log.length)log('踏入山門。');
     save();publish();render();
