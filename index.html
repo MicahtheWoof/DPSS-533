@@ -160,6 +160,53 @@ p{margin:0}
 @media (max-width:820px){.main{grid-template-columns:1fr}.tree{grid-template-columns:repeat(2,minmax(0,1fr))}}
 @media (max-width:520px){.stats{grid-template-columns:repeat(2,1fr)}.tree{grid-template-columns:1fr}.date{font-size:24px}.gate h1{font-size:24px}.places{grid-template-columns:repeat(2,1fr)}}
 @media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+
+body{padding-bottom:calc(120px + env(safe-area-inset-bottom,0px))}
+.room,.chip,.sw,.bookopt,.dk.on{--c:var(--edge);border:0;box-shadow:0 calc(-1*var(--pb)) 0 0 var(--c),0 var(--pb) 0 0 var(--c),calc(-1*var(--pb)) 0 0 0 var(--c),var(--pb) 0 0 0 var(--c)}
+.dock{position:fixed;left:0;right:0;bottom:0;z-index:15;background:var(--panel);box-shadow:0 -3px 0 0 var(--edge),0 -9px 0 0 rgba(10,8,22,.6);
+  display:grid;grid-template-columns:repeat(5,minmax(0,120px));justify-content:center;gap:8px;
+  padding:8px max(12px,env(safe-area-inset-right,0px)) calc(8px + env(safe-area-inset-bottom,0px)) max(12px,env(safe-area-inset-left,0px))}
+.dk{background:transparent;border:0;display:flex;flex-direction:column;align-items:center;gap:4px;padding:6px 0 4px;font-size:12px;color:var(--dim)}
+.dk.on{--c:var(--gold);background:var(--panel2);color:var(--gold)}
+.dk:disabled{opacity:.35;cursor:default}
+.dk:not(:disabled):hover{color:var(--ink)}
+.ico{display:block}
+.floor{display:grid;grid-template-columns:44px minmax(0,1fr);gap:12px}
+.flabel{background:var(--gold);color:var(--bg);display:flex;align-items:center;justify-content:center;font-size:16px}
+.fbody{display:flex;flex-direction:column;min-width:0}
+.rooms{display:flex;flex-wrap:wrap;gap:14px;padding:6px 3px 12px;align-items:flex-end}
+.suite{display:flex;flex-wrap:wrap;gap:14px;padding:24px 10px 10px;position:relative;outline:3px dashed rgba(242,193,78,.45);outline-offset:-3px}
+.suite-n{position:absolute;top:3px;left:10px;font-size:12px;color:var(--gold)}
+.room{width:150px;max-width:100%;text-align:left;background:var(--panel2);padding:0 0 8px;display:flex;flex-direction:column;gap:2px;overflow:hidden}
+.room>*:not(canvas){padding-inline:8px}
+.room canvas{margin-bottom:4px}
+.room b{font-weight:400;color:var(--gold);font-size:16px}
+.room .who{font-size:12px;color:var(--mist);line-height:1.5}
+.room:hover{--c:var(--gold)}
+.room.blocked{opacity:.6}.room.blocked .who{color:var(--blood)}
+.hall{height:16px;background:repeating-linear-gradient(90deg,#3a3060 0 12px,#332a56 12px 24px);font-size:12px;color:var(--dim);line-height:16px;padding-left:8px}
+.lookmain{display:grid;grid-template-columns:1fr 1.3fr;gap:16px;align-items:start}
+.lookstage{position:sticky;top:12px}
+.pedestal{display:flex;justify-content:center;padding:20px 0 0;background:linear-gradient(transparent 82%,var(--panel2) 82%)}
+.chips{display:flex;flex-wrap:wrap;gap:12px;padding:3px}
+.chip{background:var(--panel2);padding:8px 10px;display:flex;flex-direction:column;align-items:center;gap:6px;font-size:12px;min-width:76px}
+.chip.on{--c:var(--gold);color:var(--gold)}
+.chip:hover{--c:var(--mist)}
+.swatches{display:flex;gap:14px;flex-wrap:wrap;padding:3px}
+.sw{width:30px;height:30px;padding:0}
+.sw.on{--c:var(--gold);--pb:4px}
+.books{display:flex;flex-direction:column;gap:12px;padding:3px}
+.bookopt{display:flex;gap:12px;align-items:center;text-align:left;background:var(--panel2);padding:8px 10px}
+.bookopt.on{--c:var(--gold)}
+.bookopt:hover{--c:var(--mist)}
+.cover{width:18px;height:24px;flex:none;background:var(--edge);box-shadow:inset -3px 0 0 rgba(0,0,0,.35),inset 0 3px 0 rgba(255,255,255,.2)}
+.bt{display:flex;flex-direction:column;min-width:0}
+.bt b{font-weight:400;font-size:12px;color:var(--ink);overflow-wrap:anywhere}
+.bt small{font-size:12px;color:var(--dim)}
+.bookfx{font-size:12px;color:var(--gold);text-align:center}
+.skgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(230px,1fr));gap:14px;padding:3px}
+@media (max-width:820px){.lookmain{grid-template-columns:1fr}.lookstage{position:static}}
+@media (max-width:520px){.floor{grid-template-columns:32px minmax(0,1fr);gap:8px}.room{width:calc(50% - 7px)}.suite .room{width:100%}.dock{gap:4px}}
 </style>
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
@@ -187,6 +234,7 @@ p{margin:0}
     <div class="sect">五三三 · 光學宗</div>
     <div class="date" id="date">第 1 週 · 週一</div>
     <div class="me" id="me"></div>
+    <div><button class="btn" id="tab-admin" hidden>弟子總覽（管理者）</button></div>
     <div>
       <div class="tl" id="tl"></div>
       <div class="tll"><span style="grid-column:1/3">開學</span><span style="grid-column:8/11;text-align:center">期中</span><span style="grid-column:16/18;text-align:right">期末</span><span style="grid-column:18/19;text-align:right">發表</span></div>
@@ -199,14 +247,9 @@ p{margin:0}
     <div class="stat"><span>實驗成果</span><b id="s-res">0</b></div>
     <div class="stat"><span>下次組會</span><b id="s-meet">—</b></div>
   </section>
-  <nav class="tabs" role="tablist">
-    <button role="tab" data-v="act" aria-selected="true">今日行動</button>
-    <button role="tab" data-v="tree" aria-selected="false">功法圖譜</button>
-    <button role="tab" data-v="masters" aria-selected="false">師父名錄</button>
-    <button role="tab" data-v="admin" aria-selected="false" id="tab-admin" hidden>弟子總覽</button>
-  </nav>
   <div id="view"></div>
   <div class="foot"><span>樣本原型：師父名號、派系、功法與作息皆為範例，可換成 533 的實際內容。進度存在你的帳號，換裝置登入也能接著玩。</span><span id="savest"></span><span class="row"><button class="link" id="nick">改名稱</button><button class="link" id="pw">改密碼</button><button class="link" id="logout">登出</button><button class="link" id="reset">重新開始</button></span></div>
+  <nav class="dock" id="dock" aria-label="主選單"></nav>
   </div>
 </div>
 
@@ -214,13 +257,13 @@ p{margin:0}
 /* ===================== 可編輯資料區 ===================== */
 // 地點
 let PLACES={
-  big:{n:'大間休息室',d:'人最多，午餐時間特別熱鬧。',art:'lounge'},
-  small:{n:'小間休息室',d:'比較安靜，常有人在讀 paper、推公式。',art:'study'},
-  friend:{n:'606實驗室',d:'友好的 606 實驗室，有我們沒有的專長。',art:'door',num:'606'},
-  lab:{n:'524實驗室',d:'有光學桌的實驗室。可協助師父做實驗，或自己動手。',lab:true,art:'lab',num:'524',beam:'#ff3b5c'},
-  r526:{n:'526實驗室',d:'有光學桌的實驗室。可協助師父做實驗，或自己動手。',lab:true,art:'lab',num:'526',beam:'#4dff6a'},
-  r527:{n:'527實驗室',d:'有光學桌的實驗室。可協助師父做實驗，或自己動手。',lab:true,art:'lab',num:'527',beam:'#ffd23f'},
-  desk:{n:'自己的座位',d:'安靜讀書、看課本與 paper。',art:'desk'}
+  big:{n:'大間休息室',d:'人最多，午餐時間特別熱鬧。',art:'lounge',floor:5,group:'533'},
+  small:{n:'小間休息室',d:'比較安靜，常有人在讀 paper、推公式。',art:'study',floor:5,group:'533'},
+  friend:{n:'606實驗室',d:'友好的 606 實驗室，有我們沒有的專長。',art:'door',num:'606',floor:6},
+  lab:{n:'524實驗室',d:'有光學桌的實驗室。可協助師父做實驗，或自己動手。',lab:true,art:'lab',num:'524',beam:'#ff3b5c',floor:5},
+  r526:{n:'526實驗室',d:'有光學桌的實驗室。可協助師父做實驗，或自己動手。',lab:true,art:'lab',num:'526',beam:'#4dff6a',floor:5},
+  r527:{n:'527實驗室',d:'有光學桌的實驗室。可協助師父做實驗，或自己動手。',lab:true,art:'lab',num:'527',beam:'#ffd23f',floor:5},
+  desk:{n:'自己的座位',d:'安靜讀書、看課本與 paper。',art:'desk',floor:5,group:'533'}
 };
 // 派系：final 是出師要練成的功法，其前置知識會自動展開
 let SCHOOLS={
@@ -263,23 +306,75 @@ let ADV_AFF=3;                           // 學派系秘傳以上需要的好感
 /* ===================================================== */
 
 /* ===================== 像素美術 ===================== */
-const PX={k:'#1a1226',s:'#f2c39b',e:'#1a1226',w:'#f4efe1',g:'#7fe7ff'};
+const PX={k:'#1a1226',e:'#1a1226',w:'#f4efe1',g:'#7fe7ff',v:'#7fb2ff',t:'#c0392b'};
 const BODY=["....kkkk....","...khhhhk...","..khhhhhhk..","..khsssshk..","..ksessesk..","..kssssssk..","...kssssk...","..krrrrrrk..",
-  ".krrwrrwrrk.",".krrrrrrrrk.","ksrbbbbbbrsk",".krrrrrrrrk.",".krrrddrrrk.",".krrdkkdrrk.",".kddk..kddk.",".kkkk..kkkk."];
+  ".krrwrrwrrk.",".krrrrrrrrk.","ksrbbbbbbrsk",".krrrrrrrrk.",".krrrddrrrk.",".krrdkkdrrk.",".kppk..kppk.",".kffk..kffk."];
+/* ---- 外觀選項（可自行增減） ---- */
+const AV={
+  hair:[{id:'short',n:'短髮'},{id:'bun',n:'髮髻'},{id:'long',n:'長髮'},{id:'pony',n:'馬尾'},{id:'spiky',n:'刺蝟頭'},{id:'buzz',n:'平頭'}],
+  hairColor:['#2a1d14','#5a3a22','#8a5a2b','#c9a46a','#9a9aa8','#3a4a8a','#a8364a'],
+  skin:['#f6d2b4','#f2c39b','#d9a274','#b07a4f','#7a4e33'],
+  outfit:[{id:'robe',n:'外門道袍'},{id:'school',n:'本派道袍'},{id:'labcoat',n:'實驗衣'},{id:'hoodie',n:'帽T'},{id:'suit',n:'西裝（組會用）'}],
+  shoe:[{id:'closed',n:'包鞋',c:'#2a2a3a'},{id:'sneaker',n:'球鞋',c:'#f4efe1'},{id:'leather',n:'皮鞋',c:'#6b3e22'},{id:'slipper',n:'拖鞋',c:'#3fb27f',unsafe:true}]
+};
+// 教科書：拿在手上時，自修書上提到的功法進度多 +1
+let BOOKS=[
+  {id:'none',n:'不拿書',c:null,skills:[]},
+  {id:'griffiths_em',n:'Griffiths《Introduction to Electrodynamics》',short:'Griffiths 電磁學',c:'#c0392b',skills:['geo','gauss']},
+  {id:'griffiths_qm',n:'Griffiths《Introduction to Quantum Mechanics》',short:'Griffiths 量子力學',c:'#2e6db4',skills:['four']},
+  {id:'siegman',n:'Siegman《Lasers》',short:'Siegman 雷射',c:'#e0c341',skills:['gauss','cavity','rate']},
+  {id:'svelto',n:'Svelto《Principles of Lasers》',short:'Svelto 雷射原理',c:'#8e44ad',skills:['four','rate']},
+  {id:'koechner',n:'Koechner《Solid-State Laser Engineering》',short:'Koechner 固態雷射',c:'#2f8f5b',skills:['thermal','qsw','cavity']},
+  {id:'boyd',n:'Boyd《Nonlinear Optics》',short:'Boyd 非線性光學',c:'#d35400',skills:['nlo','srs']}
+];
+const DEFAULT_LOOK={hair:'short',hc:0,sk:1,outfit:'robe',shoe:'closed',book:'none'};
 function shade(c,f){const n=parseInt(String(c).slice(1,7),16)||0;const ch=v=>Math.max(0,Math.min(255,Math.round(v*f)));
   return'#'+[(n>>16)&255,(n>>8)&255,n&255].map(v=>ch(v).toString(16).padStart(2,'0')).join('');}
-function rowsFor(L){const R=BODY.map(r=>r.split(''));
-  if(L.bun)R[0]='....khhk....'.split('');
-  if(L.gog)R[4]='..kggssggk..'.split('');
-  if(L.glass)R[4]='..kwewwewk..'.split('');
-  if(L.long)for(let y=4;y<=7;y++){R[y][1]='k';R[y][2]='h';R[y][9]='h';R[y][10]='k';}
+function rowsFor(L){const R=BODY.map(r=>r.split(''));const set=(y,s)=>{R[y]=s.split('');};const hs=L.style||(L.bun?'bun':L.long?'long':'short');
+  if(hs==='bun')set(0,'....khhk....');
+  if(hs==='spiky'){set(0,'...k.kk.k...');set(1,'..khkhhkhk..');}
+  if(hs==='buzz'){set(2,'..kssssssk..');set(3,'..kssssssk..');}
+  if(hs==='pony'){[[2,'h'],[3,'h'],[4,'h']].forEach(([y,c])=>{R[y][10]=c;R[y][11]='k';});R[5][10]='k';}
+  if(L.gog)set(4,'..kggssggk..');
+  if(L.glass)set(4,'..kwewwewk..');
+  if(hs==='long')for(let y=4;y<=7;y++){R[y][1]='k';R[y][2]='h';R[y][9]='h';R[y][10]='k';}
+  const o=L.outfit||'robe';
+  if(o==='labcoat'){set(7,'..krrvvrrk..');set(8,'.krrrvvrrrk.');set(10,'ksrrrrrrrrsk');set(11,'.krdrrrrdrk.');}
+  if(o==='hoodie'){set(7,'..kddddddk..');set(8,'.krrwrrwrrk.');set(10,'ksrrrrrrrrsk');set(11,'.krrddddrrk.');}
+  if(o==='suit'){set(7,'..krwwwwrk..');set(8,'.krrwttwrrk.');set(9,'.krrrttrrrk.');set(10,'ksrrrttrrrsk');}
+  if(L.shoe==='slipper')set(15,'.ksfk..kfsk.');
   return R;}
-function drawSpr(x,L,ox,oy){L=L||{};const robe=L.robe||'#cfc8e0';const col={...PX,h:L.hair||'#2a1d14',r:robe,d:shade(robe,.68),b:L.belt||'#f2c14e'};
-  rowsFor(L).forEach((row,y)=>row.forEach((c,i)=>{if(c!=='.'){x.fillStyle=col[c];x.fillRect(ox+i,oy+y,1,1);}}));}
-function sprite(L,scale=3){const c=document.createElement('canvas');c.width=12;c.height=16;c.className='spr';
-  c.style.width=12*scale+'px';c.style.height=16*scale+'px';c.setAttribute('aria-hidden','true');drawSpr(c.getContext('2d'),L,0,0);return c;}
+const OUTFIT_COL={labcoat:['#eef0f5','#3a3a52'],hoodie:['#5a6b8a','#2a3350'],suit:['#2c2c3c','#1e1e2a']};
+function drawSpr(x,L,ox,oy){L=L||{};
+  let robe=L.robe||'#cfc8e0',pants=null;
+  if(OUTFIT_COL[L.outfit])[robe,pants]=OUTFIT_COL[L.outfit];
+  const col={...PX,s:L.skin||'#f2c39b',h:L.hair||'#2a1d14',r:robe,d:shade(robe,.68),p:pants||shade(robe,.55),b:L.belt||'#f2c14e',f:L.shoeColor||'#2a2a3a'};
+  if(L.outfit==='labcoat')col.d='#b9bccb';
+  rowsFor(L).forEach((row,y)=>row.forEach((c,i)=>{if(c!=='.'){x.fillStyle=col[c];x.fillRect(ox+i,oy+y,1,1);}}));
+  if(L.bookColor){const b=L.bookColor;x.fillStyle=shade(b,.6);x.fillRect(ox+10,oy+9,4,5);x.fillStyle=b;x.fillRect(ox+10,oy+9,3,4);
+    x.fillStyle='#f4efe1';x.fillRect(ox+13,oy+10,1,3);x.fillStyle=shade(b,1.4);x.fillRect(ox+11,oy+10,1,1);x.fillStyle=col.s;x.fillRect(ox+11,oy+12,1,1);}}
+function sprite(L,scale=3){const c=document.createElement('canvas');c.width=14;c.height=16;c.className='spr';
+  c.style.width=14*scale+'px';c.style.height=16*scale+'px';c.setAttribute('aria-hidden','true');drawSpr(c.getContext('2d'),L,0,0);return c;}
 const TEACHER={hair:'#9a9aa8',robe:'#3a3a52',glass:true,belt:'#f2c14e'};
-const playerLook=()=>({hair:'#3b2a1f',robe:'#d8d2ea',belt:(S&&S.school&&SCHOOLS[S.school]&&SCHOOLS[S.school].color)||'#8a80a8'});
+const myLook=()=>({...DEFAULT_LOOK,...((S&&S.look)||{})});
+const bookOf=id=>BOOKS.find(b=>b.id===id)||BOOKS[0];
+function avatarToLook(a){const sc=S&&S.school&&SCHOOLS[S.school];const shoe=AV.shoe.find(s=>s.id===a.shoe)||AV.shoe[0];
+  return{style:a.hair,hair:AV.hairColor[a.hc]||AV.hairColor[0],skin:AV.skin[a.sk]||AV.skin[1],outfit:a.outfit==='school'?'robe':a.outfit,
+    robe:a.outfit==='school'?((sc&&sc.color)||'#8a80a8'):'#d8d2ea',belt:a.outfit==='school'?'#f2c14e':((sc&&sc.color)||'#8a80a8'),
+    shoe:a.shoe,shoeColor:shoe.c,bookColor:bookOf(a.book).c};}
+const playerLook=()=>avatarToLook(myLook());
+const unsafeShoes=()=>{const s=AV.shoe.find(x=>x.id===myLook().shoe);return!!(s&&s.unsafe);};
+/* ---- 底部欄圖示 ---- */
+const ICONS={
+  look:{p:{k:'#1a1226',r:'#7fb2ff',w:'#f4efe1'},rows:["..kk....kk..",".krrk..krrk.","krrrrkkrrrrk","krrrrwwrrrrk",".kkrrrrrrkk.","..krrrrrrk..","..krrrrrrk..","..krrrrrrk..","..krrrrrrk..","..kkkkkkkk.."]},
+  skills:{p:{k:'#1a1226',b:'#8a5a2b',w:'#f4efe1',l:'#a99fc9'},rows:[".kkkkkkkkkk.","kbbwwwwwwbbk",".kwwwwwwwwk.",".kwllllllwk.",".kwwwwwwwwk.",".kwllllwwwk.",".kwwwwwwwwk.",".kwllllllwk.","kbbwwwwwwbbk",".kkkkkkkkkk."]},
+  map:{p:{k:'#1a1226',g:'#3fb27f',m:'#e8d6a8',r:'#ef5d5d'},rows:["kkkkkkkkkkkk","kggkmmmmkggk","kggkmrrmkggk","kggkrrrrkggk","kggkmrrmkggk","kggkmmrmkggk","kggkmmmmkggk","kggkmmmmkggk","kkkkkkkkkkkk"]},
+  lock:{p:{k:'#1a1226',y:'#a99fc9',o:'#4a3f7a'},rows:["...kkkkkk...","..ko....ok..","..ko....ok..",".kkkkkkkkkk.",".kyyyyyyyyk.",".kyyykkyyyk.",".kyyykkyyyk.",".kyyyyyyyyk.",".kkkkkkkkkk."]},
+  admin:{p:{k:'#1a1226',y:'#f2c14e',w:'#f4efe1'},rows:["kkkkkkkkkkk.","kwwwwwwwwwk.","kwkkwkkkkwk.","kwwwwwwwwwk.","kwkkwkkkkwk.","kwwwwwwwwwk.","kwkkwkkkkwk.","kwwwwwwwwwk.","kkkkkkkkkkk."]}
+};
+function icon(name,scale=3){const I=ICONS[name];const c=document.createElement('canvas');c.width=12;c.height=I.rows.length;c.className='ico';
+  c.style.width=12*scale+'px';c.style.height=I.rows.length*scale+'px';c.setAttribute('aria-hidden','true');const x=c.getContext('2d');
+  I.rows.forEach((r,y)=>[...r].forEach((ch,i)=>{if(ch!=='.'&&I.p[ch]){x.fillStyle=I.p[ch];x.fillRect(i,y,1,1);}}));return c;}
 const DIG={0:['111','101','101','101','111'],1:['010','110','010','010','111'],2:['111','001','111','100','111'],3:['111','001','111','001','111'],4:['101','101','111','001','001'],
   5:['111','100','111','001','111'],6:['111','100','111','101','111'],7:['111','001','001','001','001'],8:['111','101','111','101','111'],9:['111','101','111','001','111']};
 const glow=(c)=>/^#[0-9a-f]{6}$/i.test(c)?c+'59':c;
@@ -347,7 +442,7 @@ rebuild();
 /* ---- 內容匯出／匯入（存在 Firestore 的 config/content，只有登入者讀得到） ---- */
 function exportContent(){
   const strip=o=>JSON.parse(JSON.stringify(o,(k,v)=>['need','schools','by'].includes(k)?undefined:v));
-  return {places:strip(PLACES),schools:strip(SCHOOLS),skills:strip(SKILLS),masters:strip(MASTERS),away:AWAY,exam:EXAM,advAff:ADV_AFF};}
+  return {books:BOOKS,places:strip(PLACES),schools:strip(SCHOOLS),skills:strip(SKILLS),masters:strip(MASTERS),away:AWAY,exam:EXAM,advAff:ADV_AFF};}
 function checkContent(c){const e=[];
   if(!c||typeof c!=='object')return['不是 JSON 物件'];
   for(const k of['places','schools','skills','masters'])if(!c[k])e.push('缺少 '+k);
@@ -363,18 +458,18 @@ function checkContent(c){const e=[];
     c.skills.forEach(s=>dfs(s.id));}
   return e;}
 function applyContent(c){PLACES=c.places;SCHOOLS=c.schools;SKILLS=c.skills.map(s=>({pre:[],...s}));MASTERS=c.masters.map(m=>({sched:{},teach:[],...m}));
-  if(c.away)AWAY=c.away;if(c.exam)EXAM=c.exam;if(c.advAff!=null)ADV_AFF=c.advAff;rebuild();}
+  if(c.away)AWAY=c.away;if(Array.isArray(c.books)&&c.books.length)BOOKS=c.books;if(c.exam)EXAM=c.exam;if(c.advAff!=null)ADV_AFF=c.advAff;rebuild();}
 
-let S,view='act',filter='all';
+let S,view='map',filter='all';
 let REF=null,ADMIN=false,PLAYERS=[],ME_NAME='',CONTENT_AT='';
-const fresh=()=>({school:null,week:1,day:1,prog:{},learned:{safety:true},aff:{},res:0,resSince:0,learnSince:0,meetings:[],log:[],place:null,ended:false});
+const fresh=()=>({school:null,week:1,day:1,prog:{},learned:{safety:true},aff:{},res:0,resSince:0,learnSince:0,meetings:[],log:[],place:null,ended:false,look:{...DEFAULT_LOOK}});
 let saving=false,dirty=false;
 async function save(){if(!REF)return;dirty=true;if(saving)return;saving=true;
   while(dirty){dirty=false;try{await REF.set(JSON.parse(JSON.stringify({...S,name:ME_NAME,updatedAt:new Date().toISOString()})));$('savest').textContent='已存檔';}
     catch(e){$('savest').textContent='存檔失敗，請重新整理後再試';}}
   saving=false;}
 const $=id=>document.getElementById(id);
-function h(tag,attrs,...kids){const e=document.createElement(tag);for(const k in attrs||{}){if(k==='class')e.className=attrs[k];else if(k.startsWith('on'))e[k]=attrs[k];else if(k==='html')e.innerHTML=attrs[k];else e.setAttribute(k,attrs[k]);}
+function h(tag,attrs,...kids){const e=document.createElement(tag);for(const k in attrs||{}){if(attrs[k]==null||attrs[k]===false)continue;if(k==='class')e.className=attrs[k];else if(k.startsWith('on'))e[k]=attrs[k];else if(k==='html')e.innerHTML=attrs[k];else e.setAttribute(k,attrs[k]);}
   kids.flat().forEach(c=>{if(c!=null&&c!==false)e.append(c.nodeType?c:document.createTextNode(c));});return e;}
 function hash(a,b){let x=0;const s=a+'|'+b;for(let i=0;i<s.length;i++)x=(x*31+s.charCodeAt(i))|0;x^=x>>>15;x=Math.imul(x,2246822507);x^=x>>>13;return((x>>>0)%1000)/1000;}
 function whereIs(m,w=S.week,d=S.day){const loc=m.sched[d];if(!loc)return{loc:null};const r=hash(w*10+d,m.id);
@@ -401,7 +496,7 @@ function doAct(kind,a){
   else if(kind==='chat'){const m=MS[a.m];S.aff[m.id]=Math.min(10,aff(m.id)+1);log(`在${place}和${m.n}聊了一下午，好感 +1。`);}
   else if(kind==='help'){const m=MS[a.m];S.aff[m.id]=Math.min(10,aff(m.id)+2);const same=m.school===S.school;if(same){S.res++;S.resSince++;}
     log(`協助${m.n}做實驗，好感 +2${same?'，也累積了本派的實驗成果':''}。`);}
-  else if(kind==='study'){const s=SK[a.s];const g=S.place==='desk'?2:1;addProg(s.id,g);if(!learned(s.id))log(`自修〈${s.n}〉，進度 ${S.prog[s.id]}/${s.cost}。`);}
+  else if(kind==='study'){const s=SK[a.s];const g=(S.place==='desk'?2:1)+bookBonus(s.id);addProg(s.id,g);if(!learned(s.id))log(`自修〈${s.n}〉，進度 ${S.prog[s.id]}/${s.cost}。`);}
   else if(kind==='exp'){const fin=learned(SCHOOLS[S.school].final);const g=fin?3:1;S.res+=g;S.resSince+=g;log(fin?`獨立完成一組量測，成果 +3。`:`在桌上練習架光路，成果 +1。`);}
   else if(kind==='idle'){log(`在${place}等了一整天，沒遇到要找的人。`);}
   endDay();
@@ -464,26 +559,22 @@ function render(){
   if(S.school){const sc=SCHOOLS[S.school];const need=[...sc.need];const got=need.filter(learned).length;
     $('s-school').textContent=sc.n;$('s-path').textContent=`${got} / ${need.length}`;$('s-pathbar').style.width=got/need.length*100+'%';}
   $('s-res').textContent=S.res;const nm=nextMeetWeek();$('s-meet').textContent=S.week===18?'期末發表':nm?`第 ${nm} 週五`:'—';
-  document.querySelectorAll('.tabs button').forEach(b=>b.setAttribute('aria-selected',b.dataset.v===view));
-  const v=$('view');v.innerHTML='';v.append(view==='act'?renderAct():view==='tree'?renderTree():view==='admin'?renderAdmin():renderMasters());
+  renderDock();
+  const v=$('view');v.innerHTML='';v.append(view==='skills'?renderSkills():view==='look'?renderLook():view==='admin'?renderAdmin():renderAct());
 }
 function renderLog(){const ul=h('ul',{class:'log'});S.log.forEach(l=>ul.append(h('li',{html:`<time>${l.t}</time>${l.h}`})));return h('section',{class:'box'},h('h2',{},'修仙日誌'),ul);}
 function renderAct(){
   const wrap=h('div',{class:'main'});const left=h('div',{class:'col'});
   if(S.ended){left.append(h('section',{class:'box'},h('h2',{},'學期結束'),h('button',{class:'btn',onclick:ending},'查看期末評定')));}
-  else if(!S.place){
-    const box=h('section',{class:'box'},h('h2',{},'今天要去哪裡？',h('em',{},'一天只能去一個地方')));
-    const g=h('div',{class:'places'});
-    for(const k in PLACES){const hint=MASTERS.filter(m=>m.sched[S.day]===k).map(m=>m.n);
-      g.append(h('button',{class:'place',onclick:()=>{S.place=k;save();render();}},scene(k,MASTERS.filter(m=>m.sched[S.day]===k).map(m=>m.look)),h('b',{},PLACES[k].n),h('span',{},PLACES[k].d),
-        k==='desk'?h('span',{class:'who'},'可自修有書可讀的功法（進度 +2）'):h('span',{class:'who'},hint.length?`${DAYS[S.day]}常在這裡：${hint.join('、')}`:`${DAYS[S.day]}通常沒有師父在這`)));}
-    box.append(g,h('p',{class:'muted'},'提示：作息只是「通常」，師父偶爾會臨時不在。可到「師父名錄」查每個人的一週作息，到「功法圖譜」查功法該找誰學。'));
-    left.append(box);
+  else if(!S.place){left.append(renderMap());
   } else left.append(renderPlace());
-  wrap.append(left,h('div',{class:'col'},renderLog()));return wrap;
+  wrap.append(left,h('div',{class:'col'},renderLog()));
+  return S.place||S.ended?wrap:h('div',{class:'col'},wrap,renderMasters());
 }
 function renderPlace(){
   const k=S.place,P=PLACES[k];const box=h('section',{class:'box'},h('h2',{},P.n,h('em',{},`第 ${S.week} 週 · ${DAYS[S.day]}`)));
+  if(P.lab&&unsafeShoes()){box.append(scene(k,[],true),h('p',{class:'away'},'門口的學長把你攔下來：「穿拖鞋不能進實驗室！」實驗室規定要穿包覆式的鞋子，避免化學品、液態氮或掉落的光學元件傷到腳。'),
+    h('div',{class:'row'},h('button',{class:'btn',onclick:()=>{S.place=null;view='look';save();render();}},'回去換鞋（不花時間）')));return box;}
   let any=false;
   if(k!=='desk'){
     const here=[],away=[];MASTERS.forEach(m=>{const w=whereIs(m);if(w.loc===k)here.push(m);else if(w.expected===k)away.push([m,w.why]);});
@@ -505,7 +596,7 @@ function renderPlace(){
   if(k==='desk')box.append(scene(k,[playerLook()],true));
   const self=SKILLS.filter(selfOK);
   if(!P.lab&&self.length){const g=k==='desk'?2:1;box.append(h('h3',{style:'font-size:1rem;color:var(--dim)'},k==='desk'?'自修':'在這裡讀點書'));
-    const a=h('div',{class:'acts'});self.forEach(s=>a.append(h('button',{class:'act',onclick:()=>doAct('study',{s:s.id})},`〈${s.n}〉`,h('small',{},`${S.prog[s.id]||0}/${s.cost} · +${g}`))));box.append(a);any=true;}
+    const a=h('div',{class:'acts'});self.forEach(s=>a.append(h('button',{class:'act',onclick:()=>doAct('study',{s:s.id})},`〈${s.n}〉`,h('small',{},`${S.prog[s.id]||0}/${s.cost} · +${g+bookBonus(s.id)}${bookBonus(s.id)?'（教科書）':''}`))));box.append(a);any=true;}
   if(k==='desk'&&!self.length)box.append(h('p',{class:'muted'},'目前沒有可以自修的功法。有書可讀的基礎功法，或已經請教過、入門的功法，才能自修。'));
   if(!any)box.append(h('button',{class:'act',onclick:()=>doAct('idle')},'今天就這樣吧',h('small',{},'結束這一天')));
   return box;
@@ -567,7 +658,81 @@ function renderContentBox(){
     h('p',{class:'muted'},'師父、派系、功法、作息都在內容檔裡。先下載目前內容、修改後再上傳。內容存在資料庫，只有登入的人讀得到，不會出現在公開的網頁原始碼裡。'),
     h('div',{class:'row'},h('button',{class:'btn',onclick:dl},'下載目前內容'),h('label',{class:'btn',for:'cfile'},'上傳內容檔',file)),msg);
 }
-document.querySelectorAll('.tabs button').forEach(b=>b.onclick=()=>{view=b.dataset.v;render();});
+/* ===================== 外觀 ===================== */
+function setLook(k,v){S.look={...myLook(),[k]:v};save();render();}
+function renderLook(){
+  const a=myLook();const L=playerLook();
+  const stage=h('section',{class:'box lookstage'},h('h2',{},'外觀',h('em',{},'每次更換都會自動存檔')),
+    h('div',{class:'pedestal'},sprite(L,9)),
+    h('p',{class:'muted',style:'text-align:center'},`${S.nick||ME_NAME}　·　${(AV.outfit.find(o=>o.id===a.outfit)||{}).n||''}`),
+    a.book!=='none'?h('p',{class:'bookfx'},`手上：${bookOf(a.book).n}`):null,
+    unsafeShoes()?h('p',{class:'away'},'穿拖鞋不能進實驗室。實驗室規定要穿包覆式的鞋子，避免化學品、液態氮或掉落的光學元件傷到腳。'):null);
+  const opts=h('div',{class:'col'});
+  const group=(title,note,...kids)=>h('section',{class:'box'},h('h2',{},title,note?h('em',{},note):null),...kids);
+  const chip=(sel,on,...kids)=>h('button',{class:'chip'+(sel?' on':''),'aria-pressed':String(sel),onclick:on},...kids);
+  const prev=over=>sprite(avatarToLook({...a,...over,book:'none'}),2);
+  opts.append(
+    group('髮型',null,h('div',{class:'chips'},...AV.hair.map(o=>chip(a.hair===o.id,()=>setLook('hair',o.id),prev({hair:o.id}),h('span',{},o.n)))),
+      h('h3',{},'髮色'),h('div',{class:'swatches'},...AV.hairColor.map((c,i)=>h('button',{class:'sw'+(a.hc===i?' on':''),style:`background:${c}`,'aria-label':'髮色 '+(i+1),'aria-pressed':String(a.hc===i),onclick:()=>setLook('hc',i)})))),
+    group('膚色',null,h('div',{class:'swatches'},...AV.skin.map((c,i)=>h('button',{class:'sw'+(a.sk===i?' on':''),style:`background:${c}`,'aria-label':'膚色 '+(i+1),'aria-pressed':String(a.sk===i),onclick:()=>setLook('sk',i)})))),
+    group('套裝',null,h('div',{class:'chips'},...AV.outfit.map(o=>chip(a.outfit===o.id,()=>setLook('outfit',o.id),prev({outfit:o.id}),h('span',{},o.n))))),
+    group('鞋子','實驗室只能穿包覆式的鞋',h('div',{class:'chips'},...AV.shoe.map(o=>chip(a.shoe===o.id,()=>setLook('shoe',o.id),prev({shoe:o.id}),h('span',{},o.n+(o.unsafe?'（不能進實驗室）':'')))))),
+    group('手上的教科書','自修書裡的功法，進度多 +1',h('div',{class:'books'},...BOOKS.map(b=>{const sel=a.book===b.id;
+      return h('button',{class:'bookopt'+(sel?' on':''),'aria-pressed':String(sel),onclick:()=>setLook('book',b.id)},
+        h('span',{class:'cover',style:b.c?`background:${b.c}`:''}),
+        h('span',{class:'bt'},h('b',{},b.n),h('small',{},b.skills.length?'加成：'+b.skills.filter(id=>SK[id]).map(id=>SK[id].n).join('、'):'空手')));})))
+  );
+  return h('div',{class:'lookmain'},h('div',{class:'col'},stage),opts);
+}
+const bookBonus=id=>{const b=bookOf(myLook().book);return b.skills.includes(id)?1:0;};
+
+/* ===================== 功法 ===================== */
+let skillMode='list';
+function renderSkills(){
+  const all=SKILLS.filter(s=>!s.auto||learned(s.id));
+  const done=all.filter(s=>learned(s.id)),open=all.filter(s=>!learned(s.id)&&preOK(s)),locked=all.filter(s=>!learned(s.id)&&!preOK(s));
+  const head=h('section',{class:'box'},h('h2',{},'功法',h('em',{},`已習得 ${done.length} · 可修習 ${open.length} · 未解鎖 ${locked.length}`)),
+    h('div',{class:'filters'},...[['list','清單'],['tree','圖譜']].map(([k,n])=>h('button',{'aria-pressed':String(skillMode===k),onclick:()=>{skillMode=k;render();}},n))));
+  if(skillMode==='tree')return h('div',{class:'col'},head,renderTree());
+  const mine=S.school?SCHOOLS[S.school].need:new Set();
+  const card=s=>{const st=learned(s.id)?'done':preOK(s)?'open':'lockd';const p=S.prog[s.id]||0;
+    const where=s.by.map(m=>{const days=Object.keys(m.sched).map(d=>DAYS[d]+(PLACES[m.sched[d]]?PLACES[m.sched[d]].n.replace('休息室','').replace('實驗室',''):'')).join(' ');return`${m.n}（${days||'不定'}）`;}).join('、');
+    return h('div',{class:'node '+(st==='done'?'done':st==='open'?'open':'')},
+      h('b',{},s.n,mine.has(s.id)?h('span',{class:'tag share',style:'margin-left:6px'},'本派'):null),
+      h('span',{class:'st '+st},st==='done'?'已習得':st==='open'?`可修習 · ${p}/${s.cost}`:'尚未解鎖'),
+      st==='open'&&s.cost?h('div',{class:'bar'},h('div',{style:`width:${p/s.cost*100}%`})):null,
+      s.pre.length?h('span',{class:'pr'},'前置：'+s.pre.map(x=>(learned(x)?'✓':'')+SK[x].n).join('、')):null,
+      !s.auto?h('span',{class:'pr'},'找誰學：'+(where||'—')+(s.book?'；也可以自修':'')):h('span',{class:'pr'},s.d||''),
+      BOOKS.some(b=>b.id!=='none'&&b.skills.includes(s.id))?h('span',{class:'pr'},'推薦教科書：'+BOOKS.filter(b=>b.skills.includes(s.id)).map(b=>b.short||b.n).join('、')):null);};
+  const sec=(t,list,empty)=>h('section',{class:'box'},h('h2',{},t,h('em',{},`${list.length} 門`)),list.length?h('div',{class:'skgrid'},...list.map(card)):h('p',{class:'muted'},empty));
+  return h('div',{class:'col'},head,sec('可修習',open,'目前沒有可以修習的功法。'),sec('已習得',done,'還沒有習得任何功法。'),sec('未解鎖',locked,'所有功法都解鎖了。'));
+}
+
+/* ===================== 地圖 ===================== */
+function renderMap(){
+  const box=h('section',{class:'box'},h('h2',{},'今天要去哪裡？',h('em',{},'點地圖上的房間前往，一天只能去一個地方')));
+  const floors=[...new Set(Object.values(PLACES).map(p=>p.floor||5))].sort((a,b)=>b-a);
+  const tile=k=>{const P=PLACES[k];const who=MASTERS.filter(m=>m.sched[S.day]===k);const blocked=P.lab&&unsafeShoes();
+    return h('button',{class:'room'+(blocked?' blocked':''),onclick:()=>{S.place=k;save();render();}},
+      scene(k,who.map(m=>m.look)),h('b',{},P.n),
+      h('span',{class:'who'},blocked?'穿拖鞋不能進入':k==='desk'?'自修（進度 +2）':who.length?who.map(m=>m.n).join('、'):'通常沒有師父'));};
+  floors.forEach(f=>{
+    const keys=Object.keys(PLACES).filter(k=>(PLACES[k].floor||5)===f);
+    const row=h('div',{class:'rooms'});const groups={};
+    keys.forEach(k=>{const g=PLACES[k].group;if(g){if(!groups[g]){groups[g]=h('div',{class:'suite'},h('span',{class:'suite-n'},g));row.append(groups[g]);}groups[g].append(tile(k));}else row.append(tile(k));});
+    box.append(h('div',{class:'floor'},h('div',{class:'flabel'},`${f}F`),h('div',{class:'fbody'},row,h('div',{class:'hall'},'走廊'))));
+  });
+  box.append(h('p',{class:'muted'},`房間下方是${DAYS[S.day]}「通常」會在那裡的師父，偶爾會臨時不在。下方「師父名錄」可以查每個人的一週作息。`));
+  return box;
+}
+
+/* ===================== 底部欄 ===================== */
+const DOCK=[{v:'look',n:'外觀',i:'look'},{v:'skills',n:'功法',i:'skills'},{v:'map',n:'地圖',i:'map'},{v:'t4',n:'待定',i:'lock',off:true},{v:'t5',n:'待定',i:'lock',off:true}];
+function renderDock(){const d=$('dock');d.innerHTML='';
+  DOCK.forEach(o=>d.append(h('button',{class:'dk'+(view===o.v?' on':''),disabled:o.off?'':null,title:o.off?'即將開放':o.n,'aria-current':view===o.v?'page':null,
+    onclick:()=>{if(o.off)return;view=o.v;render();window.scrollTo({top:0});}},icon(o.i,3),h('span',{},o.n))));}
+
+$('tab-admin').onclick=()=>{view='admin';render();window.scrollTo({top:0});};
 let armed=false;
 $('reset').onclick=e=>{if(!armed){armed=true;e.target.textContent='再按一次確認重來';setTimeout(()=>{armed=false;e.target.textContent='重新開始';},3000);return;}
   armed=false;e.target.textContent='重新開始';S=fresh();save();start();};
@@ -614,7 +779,7 @@ else{
   AUTH.onAuthStateChanged(async u=>{
     if(UNSUB){UNSUB();UNSUB=null;}
     document.querySelectorAll('.ov').forEach(o=>o.remove());
-    if(!u){REF=null;ADMIN=false;PLAYERS=[];$('tab-admin').hidden=true;view='act';gate('光道修仙錄','請用管理者給你的帳號密碼登入。',true);return;}
+    if(!u){REF=null;ADMIN=false;PLAYERS=[];$('tab-admin').hidden=true;view='map';gate('光道修仙錄','請用管理者給你的帳號密碼登入。',true);return;}
     gate('光道修仙錄','正在讀取修煉進度…',false);
     ME_NAME=(u.email||'').split('@')[0];
     applyContent(DEFAULT_CONTENT);CONTENT_AT='';
