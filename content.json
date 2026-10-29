@@ -2,23 +2,48 @@
   "places": {
     "big": {
       "n": "大間休息室",
-      "d": "人最多，午餐時間特別熱鬧。"
+      "d": "人最多，午餐時間特別熱鬧。",
+      "art": "lounge"
     },
     "small": {
       "n": "小間休息室",
-      "d": "比較安靜，常有人在讀 paper、推公式。"
+      "d": "比較安靜，常有人在讀 paper、推公式。",
+      "art": "study"
     },
     "friend": {
-      "n": "友情實驗室",
-      "d": "隔壁友好的實驗室，有我們沒有的專長。"
+      "n": "606實驗室",
+      "d": "友好的 606 實驗室，有我們沒有的專長。",
+      "art": "door",
+      "num": "606"
     },
     "lab": {
-      "n": "實驗區",
-      "d": "各派系的光學桌。可協助師父做實驗，或自己動手。"
+      "n": "524實驗室",
+      "d": "有光學桌的實驗室。可協助師父做實驗，或自己動手。",
+      "lab": true,
+      "art": "lab",
+      "num": "524",
+      "beam": "#ff3b5c"
+    },
+    "r526": {
+      "n": "526實驗室",
+      "d": "有光學桌的實驗室。可協助師父做實驗，或自己動手。",
+      "lab": true,
+      "art": "lab",
+      "num": "526",
+      "beam": "#4dff6a"
+    },
+    "r527": {
+      "n": "527實驗室",
+      "d": "有光學桌的實驗室。可協助師父做實驗，或自己動手。",
+      "lab": true,
+      "art": "lab",
+      "num": "527",
+      "beam": "#ffd23f"
     },
     "desk": {
       "n": "自己的座位",
-      "d": "安靜讀書、看課本與 paper。"
+      "d": "安靜讀書、看課本與 paper。",
+      "art": "desk"
     }
   },
   "schools": {
@@ -26,19 +51,22 @@
       "n": "被動調Q派",
       "en": "PQS",
       "d": "以可飽和吸收體控制共振腔 Q 值，產生奈秒脈衝。",
-      "final": "pqs_build"
+      "final": "pqs_build",
+      "color": "#e07b39"
     },
     "aqs": {
       "n": "主動調Q派",
       "en": "AQS",
       "d": "以聲光或電光調制器主動開關共振腔。",
-      "final": "aqs_build"
+      "final": "aqs_build",
+      "color": "#4f7be0"
     },
     "raman": {
       "n": "連續拉曼派",
       "en": "CW Raman",
       "d": "利用受激拉曼散射，把雷射轉換到新的波長。",
-      "final": "raman_build"
+      "final": "raman_build",
+      "color": "#3fb27f"
     }
   },
   "skills": [
@@ -233,6 +261,12 @@
         "3": "big",
         "4": "lab",
         "5": "small"
+      },
+      "look": {
+        "hair": "#2a1d14",
+        "robe": "#e07b39",
+        "bun": true,
+        "gog": true
       }
     },
     {
@@ -252,6 +286,12 @@
         "3": "lab",
         "4": "small",
         "5": "lab"
+      },
+      "look": {
+        "hair": "#3a2030",
+        "robe": "#4f7be0",
+        "long": true,
+        "gog": true
       }
     },
     {
@@ -271,13 +311,18 @@
         "3": "lab",
         "4": "big",
         "5": "big"
+      },
+      "look": {
+        "hair": "#1d1a2a",
+        "robe": "#3fb27f",
+        "bun": true
       }
     },
     {
       "id": "m4",
       "n": "雲遊學長",
       "school": null,
-      "ext": "友情實驗室",
+      "ext": "606實驗室",
       "teach": [
         "nlo",
         "gauss",
@@ -287,6 +332,10 @@
         "2": "friend",
         "3": "friend",
         "5": "friend"
+      },
+      "look": {
+        "hair": "#6b4a2a",
+        "robe": "#8f6ad8"
       }
     },
     {
@@ -304,6 +353,11 @@
         "1": "small",
         "3": "small",
         "4": "friend"
+      },
+      "look": {
+        "hair": "#cfcfd8",
+        "robe": "#7d7f99",
+        "glass": true
       }
     }
   ],
