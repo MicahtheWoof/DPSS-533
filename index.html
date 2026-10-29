@@ -173,6 +173,7 @@ body{padding-bottom:calc(120px + env(safe-area-inset-bottom,0px))}
 .ico{display:block}
 .floor{display:grid;grid-template-columns:44px minmax(0,1fr);gap:12px}
 .flabel{background:var(--gold);color:var(--bg);display:flex;align-items:center;justify-content:center;font-size:16px}
+.flabel.out{background:var(--mist);writing-mode:vertical-rl;letter-spacing:.2em}
 .fbody{display:flex;flex-direction:column;min-width:0}
 .rooms{display:flex;flex-wrap:wrap;gap:14px;padding:6px 3px 12px;align-items:flex-end}
 .suite{display:flex;flex-wrap:wrap;gap:14px;padding:24px 10px 10px;position:relative;outline:3px dashed rgba(242,193,78,.45);outline-offset:-3px}
@@ -207,6 +208,54 @@ body{padding-bottom:calc(120px + env(safe-area-inset-bottom,0px))}
 .skgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(230px,1fr));gap:14px;padding:3px}
 @media (max-width:820px){.lookmain{grid-template-columns:1fr}.lookstage{position:static}}
 @media (max-width:520px){.floor{grid-template-columns:32px minmax(0,1fr);gap:8px}.room{width:calc(50% - 7px)}.suite .room{width:100%}.dock{gap:4px}}
+
+.node{text-align:left;color:var(--ink);font:inherit;cursor:pointer}
+.node:hover{--c:var(--mist)}
+.node .pips{color:var(--mist);letter-spacing:.05em}
+.sheet{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px 16px}
+.sheet>div{display:flex;flex-direction:column;min-width:0}
+.sheet span{font-size:12px;color:var(--dim)}
+.sheet b{font-weight:400;font-size:16px;overflow-wrap:anywhere}
+.bar.big{height:10px}
+.status{font-size:12px;padding:6px 10px;border-left:3px solid var(--dim);background:var(--panel2)}
+.status.ok{border-color:var(--jade);color:var(--jade)}.status.ahead{border-color:var(--gold);color:var(--gold)}.status.behind{border-color:var(--blood);color:#ff9a9a}
+.box>.link{align-self:flex-start}
+.steps{display:grid;grid-template-columns:repeat(auto-fit,minmax(68px,1fr));gap:12px;padding:3px}
+.step{--c:var(--edge);border:0;box-shadow:0 calc(-1*var(--pb)) 0 0 var(--c),0 var(--pb) 0 0 var(--c),calc(-1*var(--pb)) 0 0 0 var(--c),var(--pb) 0 0 0 var(--c);
+  background:var(--panel2);padding:10px;display:flex;flex-direction:column;align-items:center;gap:4px;text-align:center}
+.step b{font-weight:400;font-size:24px;color:var(--dim)}
+.step span{font-size:12px;color:var(--dim)}
+.step.on{--c:var(--jade);background:#1f3b3a}.step.on b{color:var(--jade)}.step.on b::before{content:"✓ "}
+.step:hover{--c:var(--gold)}
+textarea,select{font:inherit;color:var(--ink);background:var(--bg);border:0;padding:8px 10px;font-size:16px;
+  box-shadow:0 -3px 0 0 var(--edge),0 3px 0 0 var(--edge),-3px 0 0 0 var(--edge),3px 0 0 0 var(--edge);margin:3px;width:calc(100% - 6px);resize:vertical}
+select{width:auto;font-size:12px;padding:4px 6px}
+textarea:focus,select:focus{outline:none;box-shadow:0 -3px 0 0 var(--gold),0 3px 0 0 var(--gold),-3px 0 0 0 var(--gold),3px 0 0 0 var(--gold)}
+.reads{display:flex;flex-direction:column;gap:10px}
+.read{display:flex;gap:10px;align-items:flex-start}
+.read .tag{flex:none;margin-top:2px}
+.rt{display:flex;flex-direction:column;min-width:0;font-size:12px;line-height:1.7}
+.rt b{font-weight:400;font-size:16px;color:var(--ink);overflow-wrap:anywhere}
+.rt a{color:var(--mist)}
+.tbc{color:var(--gold)}
+.slink{background:none;border:0;padding:0 2px;color:var(--mist);text-decoration:underline;text-underline-offset:3px;font-size:inherit;margin-right:8px}
+.slink.done{color:var(--jade)}
+.slink:hover{color:var(--gold)}
+.links{display:flex;flex-wrap:wrap;gap:6px 4px}
+.libitem{display:flex;flex-direction:column;gap:8px;padding-bottom:12px;border-bottom:2px dashed var(--edge)}
+.libitem>.slink{font-size:16px;align-self:flex-start}
+.lookbox summary{cursor:pointer;display:flex;justify-content:space-between;align-items:baseline;gap:8px;list-style:none}
+.lookbox summary::-webkit-details-marker{display:none}
+.lookbox summary em{font-style:normal;font-size:12px;color:var(--dim)}
+.h2like{font-size:24px;color:var(--gold)}
+.lookbox[open] summary .h2like::after{content:" ▾"}
+.lookbox:not([open]) summary .h2like::after{content:" ▸"}
+.lgroup{display:flex;flex-direction:column;gap:8px}
+.lgroup h3 em{font-style:normal;font-size:12px}
+.mname.plain{background:none;border:0;padding:0;cursor:pointer}
+.mname.plain:hover b{color:var(--gold)}
+.mname h2{margin:0}
+.ptable td.bad{color:var(--blood)}.ptable td.good{color:var(--jade)}
 </style>
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
@@ -237,75 +286,114 @@ body{padding-bottom:calc(120px + env(safe-area-inset-bottom,0px))}
     <div><button class="btn" id="tab-admin" hidden>弟子總覽（管理者）</button></div>
     <div>
       <div class="tl" id="tl"></div>
-      <div class="tll"><span style="grid-column:1/3">開學</span><span style="grid-column:8/11;text-align:center">期中</span><span style="grid-column:16/18;text-align:right">期末</span><span style="grid-column:18/19;text-align:right">發表</span></div>
     </div>
     <div class="week" id="week"></div>
   </section>
   <section class="stats">
-    <div class="stat"><span>派系</span><b id="s-school">未入門</b></div>
-    <div class="stat"><span>出師進度</span><b id="s-path">0 / 0</b><div class="bar"><div id="s-pathbar"></div></div></div>
-    <div class="stat"><span>實驗成果</span><b id="s-res">0</b></div>
-    <div class="stat"><span>下次組會</span><b id="s-meet">—</b></div>
+    <div class="stat"><span>身分</span><b id="s-rank">未設定</b></div>
+    <div class="stat"><span>境界</span><b id="s-realm">煉氣期</b></div>
+    <div class="stat"><span>本派功法</span><b id="s-path">0 / 0</b><div class="bar"><div id="s-pathbar"></div></div></div>
+    <div class="stat"><span>其他功法</span><b id="s-mind">心法 0 重</b></div>
   </section>
   <div id="view"></div>
-  <div class="foot"><span>樣本原型：師父名號、派系、功法與作息皆為範例，可換成 533 的實際內容。進度存在你的帳號，換裝置登入也能接著玩。</span><span id="savest"></span><span class="row"><button class="link" id="nick">改名稱</button><button class="link" id="pw">改密碼</button><button class="link" id="logout">登出</button><button class="link" id="reset">重新開始</button></span></div>
+  <div class="foot"><span>師父、功法、讀物目前是範例或初稿，管理者可以在「弟子總覽 → 遊戲內容」換成 533 的實際內容。進度存在你的帳號。</span><span id="savest"></span><span class="row"><button class="link" id="nick">改名稱</button><button class="link" id="pw">改密碼</button><button class="link" id="logout">登出</button></span></div>
   <nav class="dock" id="dock" aria-label="主選單"></nav>
   </div>
 </div>
 
 <script>
-/* ===================== 可編輯資料區 ===================== */
-// 地點
+/* ===================== 可編輯資料區（也可以從「弟子總覽 → 遊戲內容」上傳 content.json 覆蓋） ===================== */
+// 學期：start 是第 1 週的週一
+let SEMESTER={name:'115 學年度第 1 學期',start:'2026-09-14',weeks:18};
+// 身分：expect 是這個身分「應達到」的境界編號（對照下方 REALMS，0 = 煉氣期）
+let RANKS=[{n:'專題生',expect:0},{n:'碩一上',expect:0},{n:'碩一下',expect:1},{n:'碩二上',expect:2},{n:'碩二下',expect:3},
+  {n:'博一',expect:2},{n:'博二',expect:3},{n:'博三以上',expect:4},{n:'博後',expect:4}];
+// 境界：依「本派要學的功法」完成比例（%）
+let REALMS=[{n:'煉氣期',min:0},{n:'築基期',min:20},{n:'金丹期',min:40},{n:'元嬰期',min:60},{n:'化神期',min:80},{n:'出師',min:100}];
+// 本派以外的功法另外計算
+let MIND={n:'心法'};
+// 地點：floor 樓層（不填就是「校外」）；group 會框在一起；lab 有光學桌；study 可以自修；tables 是實驗桌與庫存（待補）
 let PLACES={
-  big:{n:'大間休息室',d:'人最多，午餐時間特別熱鬧。',art:'lounge',floor:5,group:'533'},
-  small:{n:'小間休息室',d:'比較安靜，常有人在讀 paper、推公式。',art:'study',floor:5,group:'533'},
+  big:{n:'大間休息室',d:'人最多，午餐時間特別熱鬧。',art:'lounge',floor:5,group:'休息室'},
+  small:{n:'小間休息室',d:'比較安靜，常有人在讀 paper、推公式。',art:'study',floor:5,group:'休息室'},
   friend:{n:'606實驗室',d:'友好的 606 實驗室，有我們沒有的專長。',art:'door',num:'606',floor:6},
-  lab:{n:'524實驗室',d:'有光學桌的實驗室。可協助師父做實驗，或自己動手。',lab:true,art:'lab',num:'524',beam:'#ff3b5c',floor:5},
-  r526:{n:'526實驗室',d:'有光學桌的實驗室。可協助師父做實驗，或自己動手。',lab:true,art:'lab',num:'526',beam:'#4dff6a',floor:5},
-  r527:{n:'527實驗室',d:'有光學桌的實驗室。可協助師父做實驗，或自己動手。',lab:true,art:'lab',num:'527',beam:'#ffd23f',floor:5},
-  desk:{n:'自己的座位',d:'安靜讀書、看課本與 paper。',art:'desk',floor:5,group:'533'}
+  lab:{n:'524實驗室',d:'有光學桌的實驗室。',lab:true,art:'lab',num:'524',beam:'#ff3b5c',floor:5,tables:[]},
+  r526:{n:'526實驗室',d:'有光學桌的實驗室。',lab:true,art:'lab',num:'526',beam:'#4dff6a',floor:5,tables:[]},
+  r527:{n:'527實驗室',d:'有光學桌的實驗室。',lab:true,art:'lab',num:'527',beam:'#ffd23f',floor:5,tables:[]},
+  r327:{n:'327實驗室',d:'有光學桌的實驗室。',lab:true,art:'lab',num:'327',beam:'#ffd23f',floor:3,tables:[]},
+  home:{n:'溫馨小家',d:'早點起床，每天都要動一動。',art:'home',study:true}
 };
-// 派系：final 是出師要練成的功法，其前置知識會自動展開
 let SCHOOLS={
   pqs:{n:'被動調Q派',en:'PQS',d:'以可飽和吸收體控制共振腔 Q 值，產生奈秒脈衝。',final:'pqs_build',color:'#e07b39'},
   aqs:{n:'主動調Q派',en:'AQS',d:'以聲光或電光調制器主動開關共振腔。',final:'aqs_build',color:'#4f7be0'},
   raman:{n:'連續拉曼派',en:'CW Raman',d:'利用受激拉曼散射，把雷射轉換到新的波長。',final:'raman_build',color:'#3fb27f'}
 };
-// 功法：tier 0 基礎、1 心法、2 共通、3 派系秘傳、4 實作；book 表示可以自修；cost 為需要的修習天數（點數）
+// 功法：pre 前置；practice 代表有「做」這一步；reading 是藏經閣的讀物（type: book／paper／internal；tbc: true 代表待確認）
+const TBC='章節依版本不同，待確認';
 let SKILLS=[
-  {id:'safety',n:'雷射安全',tier:0,cost:0,pre:[],auto:true,d:'第一週安全講習自動習得。'},
-  {id:'geo',n:'幾何光學',tier:0,cost:3,pre:[],book:true},
-  {id:'four',n:'四能階系統',tier:0,cost:3,pre:[],book:true},
-  {id:'nlo',n:'非線性光學基礎',tier:0,cost:4,pre:[],book:true},
-  {id:'gauss',n:'高斯光束',tier:1,cost:3,pre:['geo'],book:true},
-  {id:'rate',n:'速率方程',tier:1,cost:4,pre:['four']},
-  {id:'align',n:'光路準直',tier:1,cost:3,pre:['safety']},
-  {id:'measure',n:'功率與光譜量測',tier:1,cost:3,pre:['safety']},
-  {id:'scope',n:'示波器與光偵測',tier:1,cost:3,pre:['safety']},
-  {id:'cavity',n:'共振腔設計',tier:2,cost:4,pre:['gauss']},
-  {id:'thermal',n:'熱透鏡效應',tier:2,cost:4,pre:['cavity']},
-  {id:'qsw',n:'Q-switch 原理',tier:2,cost:4,pre:['rate','cavity']},
-  {id:'sa',n:'可飽和吸收體',tier:3,cost:5,pre:['qsw']},
-  {id:'mod',n:'聲光／電光調制',tier:3,cost:5,pre:['qsw','scope']},
-  {id:'srs',n:'受激拉曼散射 SRS',tier:3,cost:5,pre:['nlo','four']},
-  {id:'pqs_build',n:'PQS 雷射實作',tier:4,cost:6,pre:['sa','align','measure','scope']},
-  {id:'aqs_build',n:'AQS 雷射實作',tier:4,cost:6,pre:['mod','align','measure']},
-  {id:'raman_build',n:'CW Raman 雷射實作',tier:4,cost:6,pre:['srs','cavity','thermal','align','measure']}
+  {id:'safety',n:'雷射安全',tier:0,pre:[],practice:true,reading:[{type:'internal',t:'實驗室雷射安全講習講義',note:'待補'},{type:'book',t:'ANSI Z136.1《Safe Use of Lasers》',note:'雷射安全標準，查護目鏡 OD 值與分級時用'}]},
+  {id:'geo',n:'幾何光學',tier:0,pre:[],reading:[{type:'book',t:'Hecht《Optics》',ch:'Ch.5–6 幾何光學',tbc:true}]},
+  {id:'four',n:'四能階系統',tier:0,pre:[],reading:[{type:'book',t:'Svelto《Principles of Lasers》',ch:'能階、躍遷與雷射作用的入門章節',tbc:true},{type:'book',t:'Griffiths《Introduction to Quantum Mechanics》',ch:'含時微擾、受激吸收與放射',tbc:true}]},
+  {id:'nlo',n:'非線性光學基礎',tier:0,pre:[],reading:[{type:'book',t:'Boyd《Nonlinear Optics》',ch:'Ch.1 非線性極化率',tbc:true}]},
+  {id:'gauss',n:'高斯光束',tier:1,pre:['geo'],reading:[{type:'book',t:'Saleh & Teich《Fundamentals of Photonics》',ch:'Beam Optics（高斯光束）',tbc:true},{type:'book',t:'Siegman《Lasers》',ch:'高斯光束的物理性質',tbc:true}]},
+  {id:'rate',n:'速率方程',tier:1,pre:['four'],reading:[{type:'book',t:'Svelto《Principles of Lasers》',ch:'連續波雷射行為、速率方程',tbc:true}]},
+  {id:'align',n:'光路準直',tier:1,pre:['safety'],practice:true,reading:[{type:'internal',t:'光路準直 SOP',note:'待補'}]},
+  {id:'measure',n:'功率與光譜量測',tier:1,pre:['safety'],practice:true,reading:[{type:'internal',t:'功率計、光譜儀操作說明',note:'待補，可附儀器型號與手冊'}]},
+  {id:'scope',n:'示波器與光偵測',tier:1,pre:['safety'],practice:true,reading:[{type:'internal',t:'示波器與光偵測器操作說明',note:'待補'}]},
+  {id:'cavity',n:'共振腔設計',tier:2,pre:['gauss'],reading:[{type:'book',t:'Siegman《Lasers》',ch:'穩定共振腔、ABCD 矩陣',tbc:true},{type:'book',t:'Saleh & Teich《Fundamentals of Photonics》',ch:'Resonator Optics',tbc:true}]},
+  {id:'thermal',n:'熱透鏡效應',tier:2,pre:['cavity'],reading:[{type:'book',t:'Koechner《Solid-State Laser Engineering》',ch:'熱光效應、熱透鏡',tbc:true}]},
+  {id:'qsw',n:'Q-switch 原理',tier:2,pre:['rate','cavity'],reading:[{type:'book',t:'Koechner《Solid-State Laser Engineering》',ch:'Q-Switching',tbc:true},{type:'book',t:'Siegman《Lasers》',ch:'Laser Q-Switching',tbc:true}]},
+  {id:'sa',n:'可飽和吸收體',tier:3,pre:['qsw'],reading:[{type:'book',t:'Koechner《Solid-State Laser Engineering》',ch:'Q-Switching 章中的被動調Q',tbc:true},{type:'paper',t:'J. J. Degnan, "Optimization of passively Q-switched lasers," IEEE J. Quantum Electron. 31, 1890 (1995)',tbc:true}]},
+  {id:'mod',n:'聲光／電光調制',tier:3,pre:['qsw','scope'],practice:true,reading:[{type:'book',t:'Koechner《Solid-State Laser Engineering》',ch:'Q-Switching 章中的電光、聲光調Q',tbc:true},{type:'book',t:'Saleh & Teich《Fundamentals of Photonics》',ch:'Electro-Optics、Acousto-Optics',tbc:true}]},
+  {id:'srs',n:'受激拉曼散射 SRS',tier:3,pre:['nlo','four'],reading:[{type:'book',t:'Boyd《Nonlinear Optics》',ch:'Stimulated Raman Scattering',tbc:true},{type:'paper',t:'H. M. Pask, "The design and operation of solid-state Raman lasers," Progress in Quantum Electronics 27, 3 (2003)',tbc:true}]},
+  {id:'pqs_build',n:'PQS 雷射實作',tier:4,pre:['sa','align','measure','scope'],practice:true,reading:[{type:'internal',t:'學長姐 PQS 相關碩論',note:'待補'}]},
+  {id:'aqs_build',n:'AQS 雷射實作',tier:4,pre:['mod','align','measure'],practice:true,reading:[{type:'internal',t:'學長姐 AQS 相關碩論',note:'待補'}]},
+  {id:'raman_build',n:'CW Raman 雷射實作',tier:4,pre:['srs','cavity','thermal','align','measure'],practice:true,reading:[{type:'internal',t:'學長姐 CW Raman 相關碩論',note:'待補'}]}
 ];
-// 師父：sched 是一週作息（1=週一 … 5=週五），沒寫的日子不在實驗室；每天約有 20% 機率臨時不在
+// 師父：sched 一週作息（1=週一 … 5=週五）；spec 專長；contact 聯絡方式；prep 請教前準備；look 像素外觀
 let MASTERS=[
-  {id:'m1',n:'青冥師兄',school:'pqs',teach:['align','scope','qsw','sa','pqs_build'],sched:{1:'big',2:'lab',3:'big',4:'lab',5:'small'},look:{hair:'#2a1d14',robe:'#e07b39',bun:true,gog:true}},
-  {id:'m2',n:'紫霞師姐',school:'aqs',teach:['scope','rate','qsw','mod','aqs_build'],sched:{1:'small',2:'small',3:'lab',4:'small',5:'lab'},look:{hair:'#3a2030',robe:'#4f7be0',long:true,gog:true}},
-  {id:'m3',n:'玄光師兄',school:'raman',teach:['align','cavity','thermal','srs','raman_build'],sched:{1:'lab',2:'big',3:'lab',4:'big',5:'big'},look:{hair:'#1d1a2a',robe:'#3fb27f',bun:true}},
-  {id:'m4',n:'雲遊學長',school:null,ext:'606實驗室',teach:['nlo','gauss','measure'],sched:{2:'friend',3:'friend',5:'friend'},look:{hair:'#6b4a2a',robe:'#8f6ad8'}},
-  {id:'m5',n:'藏經閣博後',school:null,teach:['geo','four','rate','gauss','cavity'],sched:{1:'small',3:'small',4:'friend'},look:{hair:'#cfcfd8',robe:'#7d7f99',glass:true}}
+  {id:'m1',n:'青冥師兄',school:'pqs',teach:['safety','align','scope','qsw','sa','pqs_build'],sched:{1:'big',2:'lab',3:'big',4:'lab',5:'small'},spec:'待補',contact:'待補',prep:'先讀完該功法的藏經閣讀物，帶著筆記和想問的問題。',look:{hair:'#2a1d14',robe:'#e07b39',bun:true,gog:true}},
+  {id:'m2',n:'紫霞師姐',school:'aqs',teach:['scope','rate','qsw','mod','aqs_build'],sched:{1:'small',2:'small',3:'lab',4:'small',5:'lab'},spec:'待補',contact:'待補',prep:'先讀完該功法的藏經閣讀物，帶著筆記和想問的問題。',look:{hair:'#3a2030',robe:'#4f7be0',long:true,gog:true}},
+  {id:'m3',n:'玄光師兄',school:'raman',teach:['align','cavity','thermal','srs','raman_build'],sched:{1:'lab',2:'big',3:'lab',4:'big',5:'big'},spec:'待補',contact:'待補',prep:'先讀完該功法的藏經閣讀物，帶著筆記和想問的問題。',look:{hair:'#1d1a2a',robe:'#3fb27f',bun:true}},
+  {id:'m4',n:'雲遊學長',school:null,ext:'606實驗室',teach:['nlo','gauss','measure'],sched:{2:'friend',3:'friend',5:'friend'},spec:'待補',contact:'待補',prep:'先讀完該功法的藏經閣讀物，帶著筆記和想問的問題。',look:{hair:'#6b4a2a',robe:'#8f6ad8'}},
+  {id:'m5',n:'藏經閣博後',school:null,teach:['geo','four','rate','gauss','cavity'],sched:{1:'small',3:'small',4:'friend'},spec:'待補',contact:'待補',prep:'先讀完該功法的藏經閣讀物，帶著筆記和想問的問題。',look:{hair:'#cfcfd8',robe:'#7d7f99',glass:true}}
 ];
-let AWAY=['去開會了','回家了','在無塵室','去聽演講','在趕論文','去送樣品'];
-let EXAM={9:[3,4,5],17:[3,4,5]};        // 期中、期末考週的考試日
-let ADV_AFF=3;                           // 學派系秘傳以上需要的好感
 /* ===================================================== */
 
-/* ===================== 像素美術 ===================== */
+const DAYS=['週日','週一','週二','週三','週四','週五','週六'];
+const TIERS=['基礎','心法','共通進階','派系秘傳','實作'];
+const STEPS=[{k:'read',n:'讀',d:'讀完藏經閣的讀物'},{k:'ask',n:'問',d:'向學長姐請教過'},{k:'do',n:'做',d:'實際操作過',practice:true},{k:'done',n:'成',d:'自評已經學會'}];
+const RTYPE={book:'書',paper:'論文',internal:'實驗室資料'};
+let SK,MS;
+function closure(id,set=new Set()){if(set.has(id)||!SK[id])return set;set.add(id);SK[id].pre.forEach(p=>closure(p,set));return set;}
+function rebuild(){SK=Object.fromEntries(SKILLS.map(s=>[s.id,s]));MS=Object.fromEntries(MASTERS.map(m=>[m.id,m]));
+  for(const k in SCHOOLS)SCHOOLS[k].need=closure(SCHOOLS[k].final);
+  SKILLS.forEach(s=>{s.schools=Object.keys(SCHOOLS).filter(k=>SCHOOLS[k].need.has(s.id));s.by=MASTERS.filter(m=>m.teach.includes(s.id));});}
+rebuild();
+
+/* ---- 內容匯出／匯入（存在 Firestore 的 config/content，只有登入的人讀得到） ---- */
+function exportContent(){
+  const strip=o=>JSON.parse(JSON.stringify(o,(k,v)=>['need','schools','by'].includes(k)?undefined:v));
+  return {semester:SEMESTER,ranks:RANKS,realms:REALMS,mind:MIND,books:BOOKS,places:strip(PLACES),schools:strip(SCHOOLS),skills:strip(SKILLS),masters:strip(MASTERS)};}
+function checkContent(c){const e=[];
+  if(!c||typeof c!=='object')return['不是 JSON 物件'];
+  for(const k of['places','schools','skills','masters'])if(!c[k])e.push('缺少 '+k);
+  if(e.length)return e;
+  const ids=new Set(c.skills.map(s=>s.id));
+  c.skills.forEach(s=>{if(!s.id||!s.n)e.push('有功法缺少 id 或 n');(s.pre||[]).forEach(p=>{if(!ids.has(p))e.push(`功法 ${s.id} 的前置 ${p} 不存在`);});});
+  for(const k in c.schools)if(!ids.has(c.schools[k].final))e.push(`派系 ${k} 的 final ${c.schools[k].final} 不存在`);
+  c.masters.forEach(m=>{(m.teach||[]).forEach(t=>{if(!ids.has(t))e.push(`師父 ${m.n} 教的 ${t} 不存在`);});
+    for(const d in (m.sched||{}))if(!c.places[m.sched[d]])e.push(`師父 ${m.n} 週${d} 的地點 ${m.sched[d]} 不存在`);
+    if(m.school&&!c.schools[m.school])e.push(`師父 ${m.n} 的派系 ${m.school} 不存在`);});
+  if(c.semester&&isNaN(new Date(c.semester.start)))e.push('semester.start 的日期格式要像 2026-09-14');
+  if(!e.length){const seen=new Set(),stack=new Set();const byId=Object.fromEntries(c.skills.map(s=>[s.id,s]));
+    const dfs=id=>{if(stack.has(id))return e.push('功法前置形成循環：'+id);if(seen.has(id))return;stack.add(id);(byId[id].pre||[]).forEach(dfs);stack.delete(id);seen.add(id);};
+    c.skills.forEach(s=>dfs(s.id));}
+  return e;}
+function applyContent(c){PLACES=c.places;SCHOOLS=c.schools;SKILLS=c.skills.map(s=>({pre:[],reading:[],...s}));MASTERS=c.masters.map(m=>({sched:{},teach:[],...m}));
+  if(c.semester)SEMESTER=c.semester;if(Array.isArray(c.ranks)&&c.ranks.length)RANKS=c.ranks;if(Array.isArray(c.realms)&&c.realms.length)REALMS=c.realms;
+  if(c.mind)MIND=c.mind;if(Array.isArray(c.books)&&c.books.length)BOOKS=c.books;rebuild();}
+
 const PX={k:'#1a1226',e:'#1a1226',w:'#f4efe1',g:'#7fe7ff',v:'#7fb2ff',t:'#c0392b'};
 const BODY=["....kkkk....","...khhhhk...","..khhhhhhk..","..khsssshk..","..ksessesk..","..kssssssk..","...kssssk...","..krrrrrrk..",
   ".krrwrrwrrk.",".krrrrrrrrk.","ksrbbbbbbrsk",".krrrrrrrrk.",".krrrddrrrk.",".krrdkkdrrk.",".kppk..kppk.",".kffk..kffk."];
@@ -370,6 +458,8 @@ const ICONS={
   skills:{p:{k:'#1a1226',b:'#8a5a2b',w:'#f4efe1',l:'#a99fc9'},rows:[".kkkkkkkkkk.","kbbwwwwwwbbk",".kwwwwwwwwk.",".kwllllllwk.",".kwwwwwwwwk.",".kwllllwwwk.",".kwwwwwwwwk.",".kwllllllwk.","kbbwwwwwwbbk",".kkkkkkkkkk."]},
   map:{p:{k:'#1a1226',g:'#3fb27f',m:'#e8d6a8',r:'#ef5d5d'},rows:["kkkkkkkkkkkk","kggkmmmmkggk","kggkmrrmkggk","kggkrrrrkggk","kggkmrrmkggk","kggkmmrmkggk","kggkmmmmkggk","kggkmmmmkggk","kkkkkkkkkkkk"]},
   lock:{p:{k:'#1a1226',y:'#a99fc9',o:'#4a3f7a'},rows:["...kkkkkk...","..ko....ok..","..ko....ok..",".kkkkkkkkkk.",".kyyyyyyyyk.",".kyyykkyyyk.",".kyyykkyyyk.",".kyyyyyyyyk.",".kkkkkkkkkk."]},
+  book:{p:{k:'#1a1226',r:'#c0392b',d:'#8a2a20',w:'#f4efe1',y:'#f2c14e'},rows:[".kkkkkkkkk..","krrrrrrrrrk.","krryyyyyrrkw","krrrrrrrrrkw","krryyyrrrrkw","krrrrrrrrrkw","krrrrrrrrrkw","kdddddddddkw",".kkkkkkkkkkk"]},
+  log:{p:{k:'#1a1226',w:'#f4efe1',l:'#7fb2ff',y:'#f2c14e'},rows:["..........ky",".kkkkkkkk.ky","kwwwwwwwkky.","kwllllwkky..","kwwwwwwky.k.","kwllllwwk.k.","kwwwwwwwwwk.","kwllllllwwk.","kwwwwwwwwwk.",".kkkkkkkkkk."]},
   admin:{p:{k:'#1a1226',y:'#f2c14e',w:'#f4efe1'},rows:["kkkkkkkkkkk.","kwwwwwwwwwk.","kwkkwkkkkwk.","kwwwwwwwwwk.","kwkkwkkkkwk.","kwwwwwwwwwk.","kwkkwkkkkwk.","kwwwwwwwwwk.","kkkkkkkkkkk."]}
 };
 function icon(name,scale=3){const I=ICONS[name];const c=document.createElement('canvas');c.width=12;c.height=I.rows.length;c.className='ico';
@@ -416,12 +506,18 @@ const ART={
     [12,12,12,11,11,10,8,6,6,8,10,11,11,12,12,12,12].forEach((y,i)=>R(18+i,y,1,1,'#4fd1a1'));
     R(39,15,10,2,'#d65a7a');R(40,13,9,2,'#4f7be0');R(39,11,10,2,'#f2c14e');R(41,9,7,2,'#3fb27f');
     R(51,9,1,8,'#55608a');R(49,7,5,2,'#f2c14e');R(50,9,3,1,'#ffe9a0');},
+  home(R){R(0,0,64,23,'#3a2a4a');floor(R,'#6b4a3a','#5a3c2e','#4a3858');
+    R(26,3,14,10,'#1a1226');R(27,4,12,8,'#ffb36b');R(27,4,12,3,'#ff8a5b');R(31,8,4,2,'#ffe08a');R(32,7,2,1,'#fff3c0');R(27,10,12,2,'#7a5a8a');R(32,4,1,8,'#1a1226');
+    R(3,15,22,3,'#8a5a3a');R(3,12,3,11,'#8a5a3a');R(4,13,5,3,'#f4efe1');R(8,15,17,3,'#e07b9a');R(8,15,17,1,'#f2a0b8');R(3,18,22,2,'#6b4428');R(4,20,2,3,'#5a3c26');R(22,20,2,3,'#5a3c26');
+    R(42,15,8,8,'#8a5a3a');R(42,15,8,1,'#a8714a');R(44,12,4,3,'#ef5d5d');R(45,13,2,1,'#f4efe1');R(43,11,1,1,'#f2c14e');R(48,11,1,1,'#f2c14e');R(44,19,4,1,'#5e3c26');
+    R(30,29,24,2,'#3fb27f');R(30,29,24,1,'#4fd1a1');
+    R(52,25,1,4,'#55608a');R(58,25,1,4,'#55608a');R(53,26,5,1,'#a99fc9');R(51,24,3,6,'#2a2a3a');R(57,24,3,6,'#2a2a3a');},
   meeting(R){R(0,0,64,23,'#262046');floor(R,'#3a3060','#302852','#3a3466');
     R(16,1,32,17,'#1a1226');R(17,2,30,15,'#eceef6');
     [[20,8,'#4f7be0'],[25,11,'#e07b39'],[30,6,'#3fb27f'],[35,12,'#d65a7a'],[40,9,'#8f6ad8']].forEach(([a,h,c])=>R(a,15-h,4,h,c));R(19,15,26,1,'#1a1226');
     R(14,24,36,2,'#6b4a2a');R(14,24,36,1,'#8a5a3a');}
 };
-const SPOTS={lounge:[27,40,9,52],study:[24,36,48,8],door:[8,44,14,52],lab:[12,26,40,50],desk:[30,10,44,20],meeting:[3,50,28,16]};
+const SPOTS={home:[30,14,44,50],lounge:[27,40,9,52],study:[24,36,48,8],door:[8,44,14,52],lab:[12,26,40,50],desk:[30,10,44,20],meeting:[3,50,28,16]};
 function scene(k,people=[],big=false){
   const P=PLACES[k]||{};const art=ART[P.art]?P.art:ART[k]?k:P.lab?'lab':'lounge';
   const c=document.createElement('canvas');c.width=64;c.height=32;c.className='scene'+(big?' big':'');c.setAttribute('aria-hidden','true');
@@ -431,223 +527,279 @@ function scene(k,people=[],big=false){
   people.slice(0,4).forEach((L,i)=>drawSpr(x,L,SPOTS[art][i],16));
   return c;}
 
-const DAYS=['','週一','週二','週三','週四','週五'];
-const TIERS=['基礎','心法','共通','派系秘傳','實作'];
-let SK,MS;
-function closure(id,set=new Set()){if(set.has(id))return set;set.add(id);SK[id].pre.forEach(p=>closure(p,set));return set;}
-function rebuild(){SK=Object.fromEntries(SKILLS.map(s=>[s.id,s]));MS=Object.fromEntries(MASTERS.map(m=>[m.id,m]));
-  for(const k in SCHOOLS)SCHOOLS[k].need=closure(SCHOOLS[k].final);
-  SKILLS.forEach(s=>{s.schools=Object.keys(SCHOOLS).filter(k=>SCHOOLS[k].need.has(s.id));s.by=MASTERS.filter(m=>m.teach.includes(s.id));});}
-rebuild();
-/* ---- 內容匯出／匯入（存在 Firestore 的 config/content，只有登入者讀得到） ---- */
-function exportContent(){
-  const strip=o=>JSON.parse(JSON.stringify(o,(k,v)=>['need','schools','by'].includes(k)?undefined:v));
-  return {books:BOOKS,places:strip(PLACES),schools:strip(SCHOOLS),skills:strip(SKILLS),masters:strip(MASTERS),away:AWAY,exam:EXAM,advAff:ADV_AFF};}
-function checkContent(c){const e=[];
-  if(!c||typeof c!=='object')return['不是 JSON 物件'];
-  for(const k of['places','schools','skills','masters'])if(!c[k])e.push('缺少 '+k);
-  if(e.length)return e;
-  const ids=new Set(c.skills.map(s=>s.id));
-  c.skills.forEach(s=>(s.pre||[]).forEach(p=>{if(!ids.has(p))e.push(`功法 ${s.id} 的前置 ${p} 不存在`);}));
-  for(const k in c.schools)if(!ids.has(c.schools[k].final))e.push(`派系 ${k} 的 final ${c.schools[k].final} 不存在`);
-  c.masters.forEach(m=>{(m.teach||[]).forEach(t=>{if(!ids.has(t))e.push(`師父 ${m.n} 教的 ${t} 不存在`);});
-    for(const d in (m.sched||{}))if(!c.places[m.sched[d]])e.push(`師父 ${m.n} 週${d} 的地點 ${m.sched[d]} 不存在`);
-    if(m.school&&!c.schools[m.school])e.push(`師父 ${m.n} 的派系 ${m.school} 不存在`);});
-  if(!e.length){const seen=new Set(),stack=new Set();const byId=Object.fromEntries(c.skills.map(s=>[s.id,s]));
-    const dfs=id=>{if(stack.has(id))return e.push('功法前置形成循環：'+id);if(seen.has(id))return;stack.add(id);(byId[id].pre||[]).forEach(dfs);stack.delete(id);seen.add(id);};
-    c.skills.forEach(s=>dfs(s.id));}
-  return e;}
-function applyContent(c){PLACES=c.places;SCHOOLS=c.schools;SKILLS=c.skills.map(s=>({pre:[],...s}));MASTERS=c.masters.map(m=>({sched:{},teach:[],...m}));
-  if(c.away)AWAY=c.away;if(Array.isArray(c.books)&&c.books.length)BOOKS=c.books;if(c.exam)EXAM=c.exam;if(c.advAff!=null)ADV_AFF=c.advAff;rebuild();}
 
-let S,view='map',filter='all';
-let REF=null,ADMIN=false,PLAYERS=[],ME_NAME='',CONTENT_AT='';
-const fresh=()=>({school:null,week:1,day:1,prog:{},learned:{safety:true},aff:{},res:0,resSince:0,learnSince:0,meetings:[],log:[],place:null,ended:false,look:{...DEFAULT_LOOK}});
+
+/* ===================== 狀態 ===================== */
+let S,view='map',sel=null,back=null,skillMode='list',filter='all';
+let REF=null,ADMIN=false,PLAYERS=[],ROSTERS={},ROSTER={},ME_NAME='',CONTENT_AT='';
+const fresh=()=>({school:null,steps:{},look:{...DEFAULT_LOOK},log:[],nick:'',realmSeen:0});
+const $=id=>document.getElementById(id);
+function h(tag,attrs,...kids){const e=document.createElement(tag);for(const k in attrs||{}){const v=attrs[k];if(v==null||v===false)continue;
+    if(k==='class')e.className=v;else if(k.startsWith('on'))e[k]=v;else if(k==='html')e.innerHTML=v;else e.setAttribute(k,v);}
+  kids.flat().forEach(c=>{if(c!=null&&c!==false)e.append(c.nodeType?c:document.createTextNode(c));});return e;}
+const today=()=>new Date();
+const fmtDate=d=>`${d.getFullYear()}/${d.getMonth()+1}/${d.getDate()}`;
+function semWeek(){const s=new Date(SEMESTER.start+'T00:00:00');const diff=Math.floor((today()-s)/864e5);
+  if(isNaN(diff))return null;if(diff<0)return 0;return Math.floor(diff/7)+1;}
+const weekday=()=>today().getDay();
+const st=id=>(S.steps&&S.steps[id])||{};
+const learned=id=>!!st(id).done;
+const preOK=s=>s.pre.every(learned);
+const myRank=()=>RANKS.find(r=>r.n===ROSTER.rank)||null;
+const mySchool=()=>ROSTER.school&&SCHOOLS[ROSTER.school]?ROSTER.school:S.school;
+function pathOf(sc){return sc&&SCHOOLS[sc]?[...SCHOOLS[sc].need]:[];}
+function realmFor(steps,sc){const path=pathOf(sc);const got=path.filter(id=>steps&&steps[id]&&steps[id].done).length;
+  const pct=path.length?got/path.length*100:0;let i=0;REALMS.forEach((r,j)=>{if(pct>=r.min)i=j;});return{i,pct,got,total:path.length};}
+function mindFor(steps,sc){const path=new Set(pathOf(sc));return SKILLS.filter(s=>!path.has(s.id)&&steps&&steps[s.id]&&steps[s.id].done).length;}
+const myRealm=()=>realmFor(S.steps,mySchool());
+const myMind=()=>mindFor(S.steps,mySchool());
+const schoolTag=k=>SCHOOLS[k]?h('span',{class:'tag '+k},SCHOOLS[k].en):null;
+function masterTag(m){return m.school&&SCHOOLS[m.school]?schoolTag(m.school):h('span',{class:'tag ext'},m.ext||'通才');}
+function log(html){S.log.unshift({t:fmtDate(today()),h:html});S.log=S.log.slice(0,200);}
 let saving=false,dirty=false;
 async function save(){if(!REF)return;dirty=true;if(saving)return;saving=true;
   while(dirty){dirty=false;try{await REF.set(JSON.parse(JSON.stringify({...S,name:ME_NAME,updatedAt:new Date().toISOString()})));$('savest').textContent='已存檔';}
     catch(e){$('savest').textContent='存檔失敗，請重新整理後再試';}}
   saving=false;}
-const $=id=>document.getElementById(id);
-function h(tag,attrs,...kids){const e=document.createElement(tag);for(const k in attrs||{}){if(attrs[k]==null||attrs[k]===false)continue;if(k==='class')e.className=attrs[k];else if(k.startsWith('on'))e[k]=attrs[k];else if(k==='html')e.innerHTML=attrs[k];else e.setAttribute(k,attrs[k]);}
-  kids.flat().forEach(c=>{if(c!=null&&c!==false)e.append(c.nodeType?c:document.createTextNode(c));});return e;}
-function hash(a,b){let x=0;const s=a+'|'+b;for(let i=0;i<s.length;i++)x=(x*31+s.charCodeAt(i))|0;x^=x>>>15;x=Math.imul(x,2246822507);x^=x>>>13;return((x>>>0)%1000)/1000;}
-function whereIs(m,w=S.week,d=S.day){const loc=m.sched[d];if(!loc)return{loc:null};const r=hash(w*10+d,m.id);
-  if(r<.2)return{loc:null,expected:loc,why:AWAY[Math.floor(r*100)%AWAY.length]};return{loc};}
-const aff=id=>S.aff[id]||0;
-const learned=id=>!!S.learned[id];
-const preOK=s=>s.pre.every(learned);
-function canTeach(m,s){if(learned(s.id))return'已習得';if(!preOK(s))return'需先學：'+s.pre.filter(p=>!learned(p)).map(p=>SK[p].n).join('、');
-  if(s.tier>=3&&aff(m.id)<ADV_AFF)return`好感需達 ${ADV_AFF}（目前 ${aff(m.id)}）`;return'';}
-const selfOK=s=>!learned(s.id)&&preOK(s)&&(s.book||(S.prog[s.id]||0)>0);
-const schoolTag=k=>h('span',{class:'tag '+k},SCHOOLS[k].en);
-function masterTag(m){return m.school?schoolTag(m.school):h('span',{class:'tag ext'},m.ext||'通才');}
-function log(html){S.log.unshift({t:`W${S.week} ${DAYS[S.day]}`,h:html});S.log=S.log.slice(0,80);}
-const nextMeetWeek=()=>{let w=S.week%2===0?S.week:S.week+1;if(w>=18)return null;return w;};
-
-function addProg(id,n){const s=SK[id];S.prog[id]=Math.min(s.cost,(S.prog[id]||0)+n);
-  if(S.prog[id]>=s.cost&&!learned(id)){S.learned[id]=true;S.learnSince++;log(`<b>習得〈${s.n}〉！</b>`);
-    if(S.school&&id===SCHOOLS[S.school].final)log(`<b>練成本派實作，可以獨立上桌了。</b>`);}}
-
-function doAct(kind,a){
-  const place=PLACES[S.place].n;
-  if(kind==='teach'){const m=MS[a.m],s=SK[a.s];const g=aff(m.id)>=5?3:2;addProg(s.id,g);S.aff[m.id]=Math.min(10,aff(m.id)+1);
-    if(!learned(s.id))log(`在${place}向${m.n}請教〈${s.n}〉，進度 ${S.prog[s.id]}/${s.cost}。`);}
-  else if(kind==='chat'){const m=MS[a.m];S.aff[m.id]=Math.min(10,aff(m.id)+1);log(`在${place}和${m.n}聊了一下午，好感 +1。`);}
-  else if(kind==='help'){const m=MS[a.m];S.aff[m.id]=Math.min(10,aff(m.id)+2);const same=m.school===S.school;if(same){S.res++;S.resSince++;}
-    log(`協助${m.n}做實驗，好感 +2${same?'，也累積了本派的實驗成果':''}。`);}
-  else if(kind==='study'){const s=SK[a.s];const g=(S.place==='desk'?2:1)+bookBonus(s.id);addProg(s.id,g);if(!learned(s.id))log(`自修〈${s.n}〉，進度 ${S.prog[s.id]}/${s.cost}。`);}
-  else if(kind==='exp'){const fin=learned(SCHOOLS[S.school].final);const g=fin?3:1;S.res+=g;S.resSince+=g;log(fin?`獨立完成一組量測，成果 +3。`:`在桌上練習架光路，成果 +1。`);}
-  else if(kind==='idle'){log(`在${place}等了一整天，沒遇到要找的人。`);}
-  endDay();
-}
-
-function endDay(){
-  S.place=null;
-  if(S.week===18&&S.day===5){S.ended=true;save();render();return ending();}
-  let meet=S.week%2===0&&S.day===5;
-  const go=()=>{advance();save();render();};
-  if(meet)meeting(go);else go();
-}
-function advance(){
-  for(;;){S.day++;if(S.day>5){S.day=1;S.week++;if(S.week===9)log('<b>期中考週</b>：週三到週五要考試。');if(S.week===17)log('<b>期末考週</b>：週三到週五要考試。');if(S.week===18)log('<b>第 18 週</b>：週五是期末成果發表。');}
-    if(EXAM[S.week]&&EXAM[S.week].includes(S.day)){log(`考試中，沒有進實驗室。`);continue;}break;}
-}
 function overlay(build){const ov=h('div',{class:'ov'});const b=h('div',{class:'ovb'});ov.append(b);document.body.append(ov);build(b,()=>ov.remove());const f=b.querySelector('button');if(f)f.focus();}
-function meeting(done){
-  const score=S.resSince+S.learnSince*2;
-  const [t,msg]=score>=7?['老師點頭稱許','進度很好。老師要你下次把量測條件整理成表格，順便帶學弟妹看一次。']:
-    score>=3?['老師給了幾個建議','有進度，但老師提醒你：新學的東西要實際用在實驗上，數據才有說服力。']:
-    ['老師沉默了一下','「這兩週在做什麼？」記得多去找師父請教，或上桌做點實驗。'];
-  S.meetings.push(score);log(`<b>組會</b>：${t}（學會 ${S.learnSince} 門功法、成果 ${S.resSince}）。`);
-  S.resSince=0;S.learnSince=0;
-  overlay((b,close)=>{b.append(h('h1',{},'宗門大會（組會）'),scene('meeting',[playerLook(),TEACHER],true),h('p',{class:'muted',style:'text-align:center'},`第 ${S.week} 週 · 週五`),h('h2',{style:'text-align:center'},t),h('p',{},msg),
-    h('button',{class:'btn',style:'align-self:center',onclick:()=>{close();done();}},'散會'));});
-}
-function ending(){
-  const sc=SCHOOLS[S.school];const need=[...sc.need];const got=need.filter(learned).length;const fin=learned(sc.final);
-  const avg=S.meetings.length?S.meetings.reduce((a,b)=>a+b,0)/S.meetings.length:0;
-  const title=fin&&S.res>=10?'出師':fin?'可以上桌了':got/need.length>=.6?'登堂入室':'仍在山門';
-  const best=MASTERS.slice().sort((a,b)=>aff(b.id)-aff(a.id))[0];
-  overlay((b,close)=>{b.append(h('h1',{},`期末評定：${title}`),h('div',{class:'hero'},sprite(playerLook(),6)),
-    h('div',{class:'sum'},h('div',{},h('b',{},`${got}/${need.length}`),h('span',{},`${sc.en} 功法`)),h('div',{},h('b',{},S.res),h('span',{},'實驗成果')),h('div',{},h('b',{},avg.toFixed(1)),h('span',{},'組會平均'))),
-    h('p',{},fin?`你練成了〈${SK[sc.final].n}〉。下學期就輪到你當師父，在休息室等學弟妹來請教了。`:`本派還有 ${need.length-got} 門功法沒練成。到「功法圖譜」看看卡在哪個前置知識，下學期再找對的師父。`),
-    best&&aff(best.id)?h('p',{class:'muted'},`這學期和你最熟的是${best.n}（好感 ${aff(best.id)}）。`):null,
-    h('button',{class:'btn',style:'align-self:center',onclick:()=>{close();S=fresh();save();start();}},'再修一學期'));});
-}
+function go(v,s){back={view,sel};view=v;sel=s===undefined?null:s;render();window.scrollTo({top:0});}
+const backBtn=(label)=>h('button',{class:'link',onclick:()=>{if(back){view=back.view;sel=back.sel;back=null;}else{view='map';sel=null;}render();}},'← '+(label||'返回'));
+const skillLink=id=>SK[id]?h('button',{class:'slink'+(learned(id)?' done':''),onclick:()=>go('skill',id)},(learned(id)?'✓ ':'')+SK[id].n):null;
 
-function start(){
-  if(!S.log.length)log('踏入五三三光學宗山門。第一週參加安全講習，習得〈雷射安全〉。');
-  render();
-  if(S.school)return;
-  overlay((b,close)=>{
-    b.append(h('h1',{},'拜入哪一派？'),h('p',{class:'muted'},'老師依實驗桌分派系。每一派要練成的功法不同，但有不少前置知識是共通的。'));
-    const p=h('div',{class:'pick'});
-    for(const k in SCHOOLS){const sc=SCHOOLS[k];const head=MASTERS.find(m=>m.school===k);
-      p.append(h('button',{onclick:()=>{S.school=k;log(`拜入<b>${sc.n}</b>，${head?head.n:''}是本派的師父。`);close();save();render();}},
-        h('span',{class:'mname'},head?sprite(head.look,3):null,h('b',{},`${sc.n}　${sc.en}`)),h('span',{},sc.d),h('span',{},`出師需 ${sc.need.size} 門功法 · 本派師父：${head?head.n:'—'}`)));}
-    b.append(p);
-  });
-}
+function setStep(id,k,v){S.steps[id]={...st(id),[k]:v};const s=SK[id];
+  if(k==='done'&&v)log(`<b>習得〈${s.n}〉</b>`);
+  if(k==='done'&&!v)log(`取消〈${s.n}〉的習得`);
+  const r=myRealm();
+  if(r.i>(S.realmSeen||0)){S.realmSeen=r.i;log(`<b>突破至${REALMS[r.i].n}！</b>`);save();render();
+    overlay((b,close)=>{b.append(h('h1',{},REALMS[r.i].n==='出師'?'出師！':`突破至${REALMS[r.i].n}`),h('div',{class:'hero'},sprite(playerLook(),7)),
+      h('p',{style:'text-align:center'},REALMS[r.i].n==='出師'?'本派要學的功法全部練成了。之後就輪到你當學弟妹的師父。':`本派功法完成 ${r.got}/${r.total}（${Math.round(r.pct)}%）。`),
+      h('button',{class:'btn',style:'align-self:center',onclick:close},'繼續修煉'));});return;}
+  if(r.i<(S.realmSeen||0))S.realmSeen=r.i;
+  save();render();}
 
-/* ===================== render ===================== */
+/* ===================== 上方 ===================== */
+function renderTop(){
+  const w=semWeek();
+  $('date').replaceChildren(document.createTextNode(w===0?'學期還沒開始':w>SEMESTER.weeks?'學期已結束':`第 ${w} 週 · ${DAYS[weekday()]}`),h('small',{},SEMESTER.name));
+  const tl=$('tl');tl.innerHTML='';for(let i=1;i<=SEMESTER.weeks;i++)tl.append(h('div',{class:i<w?'past':i===w?'now':'',title:`第 ${i} 週`}));
+  tl.style.gridTemplateColumns=`repeat(${SEMESTER.weeks},1fr)`;
+  const wk=$('week');wk.innerHTML='';for(let d=1;d<=5;d++)wk.append(h('div',{class:d===weekday()?'now':''},h('b',{},DAYS[d]),d===weekday()?h('i',{},'今天'):' '));
+  const r=myRealm(),rk=myRank(),sc=mySchool();
+  $('s-rank').textContent=rk?rk.n:'未設定';
+  $('s-realm').textContent=REALMS[r.i].n;
+  $('s-path').textContent=sc?`${r.got} / ${r.total}`:'未入門';$('s-pathbar').style.width=r.pct+'%';
+  $('s-mind').textContent=`${MIND.n} ${myMind()} 重`;
+  $('me').replaceChildren(sprite(playerLook(),2),h('span',{},`${S.nick||ME_NAME}${rk?' · '+rk.n:''} · ${REALMS[r.i].n}`));
+}
 function render(){
-  $('date').innerHTML=`第 ${S.week} 週 · ${DAYS[S.day]}<small>${S.week<9?'上半學期':S.week<17?'下半學期':'學期末'}${EXAM[S.week]?' · 考試週':''}</small>`;
-  const tl=$('tl');tl.innerHTML='';for(let w=1;w<=18;w++)tl.append(h('div',{class:(w<S.week?'past':w===S.week?'now':'')+([1,9,17,18].includes(w)?' ev':''),title:`第 ${w} 週`}));
-  const wk=$('week');wk.innerHTML='';for(let d=1;d<=5;d++){const ex=EXAM[S.week]&&EXAM[S.week].includes(d);const mt=S.week%2===0&&d===5;
-    wk.append(h('div',{class:d<S.day?'past':d===S.day?'now':''},h('b',{},DAYS[d]),ex?h('i',{},'考試'):S.week===18&&d===5?h('i',{},'成果發表'):mt?h('i',{},'組會'):' '));}
-  if(S.school){const sc=SCHOOLS[S.school];const need=[...sc.need];const got=need.filter(learned).length;
-    $('s-school').textContent=sc.n;$('s-path').textContent=`${got} / ${need.length}`;$('s-pathbar').style.width=got/need.length*100+'%';}
-  $('s-res').textContent=S.res;const nm=nextMeetWeek();$('s-meet').textContent=S.week===18?'期末發表':nm?`第 ${nm} 週五`:'—';
-  renderDock();
-  const v=$('view');v.innerHTML='';v.append(view==='skills'?renderSkills():view==='look'?renderLook():view==='admin'?renderAdmin():renderAct());
+  renderTop();renderDock();
+  const v=$('view');v.innerHTML='';
+  const map={me:renderMe,skills:renderSkills,skill:renderSkill,lib:renderLib,map:renderMapView,room:renderRoom,log:renderLogView,admin:renderAdmin,master:renderMaster};
+  v.append((map[view]||renderMapView)());
 }
-function renderLog(){const ul=h('ul',{class:'log'});S.log.forEach(l=>ul.append(h('li',{html:`<time>${l.t}</time>${l.h}`})));return h('section',{class:'box'},h('h2',{},'修仙日誌'),ul);}
-function renderAct(){
-  const wrap=h('div',{class:'main'});const left=h('div',{class:'col'});
-  if(S.ended){left.append(h('section',{class:'box'},h('h2',{},'學期結束'),h('button',{class:'btn',onclick:ending},'查看期末評定')));}
-  else if(!S.place){left.append(renderMap());
-  } else left.append(renderPlace());
-  wrap.append(left,h('div',{class:'col'},renderLog()));
-  return S.place||S.ended?wrap:h('div',{class:'col'},wrap,renderMasters());
+
+/* ===================== 人物 ===================== */
+function status(){const rk=myRank(),r=myRealm();if(!rk)return{c:'',t:'身分還沒設定（請管理者在「弟子總覽」設定）'};
+  const d=r.i-rk.expect;return d>=1?{c:'ahead',t:`超前：${rk.n}應達${REALMS[rk.expect].n}，你已經是${REALMS[r.i].n}`}:d===0?{c:'ok',t:`進度正常：${rk.n}應達${REALMS[rk.expect].n}`}:{c:'behind',t:`落後 ${-d} 個境界：${rk.n}應達${REALMS[rk.expect].n}`};}
+function nextSkills(n=4){const path=pathOf(mySchool());const order=SKILLS.filter(s=>path.includes(s.id)&&!learned(s.id));
+  return order.filter(preOK).concat(order.filter(s=>!preOK(s))).slice(0,n);}
+function renderMe(){
+  const r=myRealm(),rk=myRank(),sc=mySchool(),stt=status();
+  const nxt=REALMS[r.i+1];const need=nxt?Math.ceil(nxt.min/100*r.total)-r.got:0;
+  const card=h('section',{class:'box lookstage'},h('h2',{},'人物',h('em',{},sc?SCHOOLS[sc].n:'未入門')),
+    h('div',{class:'pedestal'},sprite(playerLook(),9)),
+    h('div',{class:'sheet'},
+      h('div',{},h('span',{},'名稱'),h('b',{},S.nick||ME_NAME)),
+      h('div',{},h('span',{},'身分'),h('b',{},rk?rk.n:'未設定')),
+      h('div',{},h('span',{},'境界'),h('b',{},REALMS[r.i].n)),
+      h('div',{},h('span',{},MIND.n),h('b',{},`${myMind()} 重`))),
+    h('div',{},h('div',{class:'bar big'},h('div',{style:`width:${r.pct}%`})),h('p',{class:'muted'},sc?`本派功法 ${r.got}/${r.total}（${Math.round(r.pct)}%）`+(nxt?`，再 ${Math.max(need,0)} 門到${nxt.n}`:''):'還沒有派系')),
+    h('p',{class:'status '+stt.c},stt.t),
+    h('p',{class:'muted'},`本派以外的功法算在「${MIND.n}」，學一門加一重。`));
+  const todo=h('section',{class:'box'},h('h2',{},'接下來該學',h('em',{},'依本派路線')),
+    ...(nextSkills().length?nextSkills().map(s=>h('button',{class:'act',onclick:()=>go('skill',s.id)},s.n,h('small',{},preOK(s)?stepPips(s):'前置還沒完成'))):[h('p',{class:'muted'},sc?'本派功法全部練成了！':'先選一個派系。')]));
+  const look=h('details',{class:'box lookbox'},h('summary',{},h('span',{class:'h2like'},'外觀'),h('em',{},'髮型、膚色、套裝、鞋子、教科書')),renderLookOptions());
+  return h('div',{class:'lookmain'},h('div',{class:'col'},card),h('div',{class:'col'},todo,look));
 }
-function renderPlace(){
-  const k=S.place,P=PLACES[k];const box=h('section',{class:'box'},h('h2',{},P.n,h('em',{},`第 ${S.week} 週 · ${DAYS[S.day]}`)));
+function stepPips(s){return STEPS.filter(x=>!x.practice||s.practice).map(x=>(st(s.id)[x.k]?'■':'□')+x.n).join(' ');}
+function setLook(k,v){S.look={...myLook(),[k]:v};save();render();}
+function renderLookOptions(){
+  const a=myLook();const wrap=h('div',{class:'col'});
+  const group=(title,note,...kids)=>h('div',{class:'lgroup'},h('h3',{},title,note?h('em',{},'　'+note):null),...kids);
+  const chip=(sel,on,...kids)=>h('button',{class:'chip'+(sel?' on':''),'aria-pressed':String(sel),onclick:on},...kids);
+  const prev=over=>sprite(avatarToLook({...a,...over,book:'none'}),2);
+  wrap.append(
+    group('髮型',null,h('div',{class:'chips'},...AV.hair.map(o=>chip(a.hair===o.id,()=>setLook('hair',o.id),prev({hair:o.id}),h('span',{},o.n))))),
+    group('髮色',null,h('div',{class:'swatches'},...AV.hairColor.map((c,i)=>h('button',{class:'sw'+(a.hc===i?' on':''),style:`background:${c}`,'aria-label':'髮色 '+(i+1),'aria-pressed':String(a.hc===i),onclick:()=>setLook('hc',i)})))),
+    group('膚色',null,h('div',{class:'swatches'},...AV.skin.map((c,i)=>h('button',{class:'sw'+(a.sk===i?' on':''),style:`background:${c}`,'aria-label':'膚色 '+(i+1),'aria-pressed':String(a.sk===i),onclick:()=>setLook('sk',i)})))),
+    group('套裝',null,h('div',{class:'chips'},...AV.outfit.map(o=>chip(a.outfit===o.id,()=>setLook('outfit',o.id),prev({outfit:o.id}),h('span',{},o.n))))),
+    group('鞋子','實驗室只能穿包覆式的鞋',h('div',{class:'chips'},...AV.shoe.map(o=>chip(a.shoe===o.id,()=>setLook('shoe',o.id),prev({shoe:o.id}),h('span',{},o.n+(o.unsafe?'（不能進實驗室）':'')))))),
+    group('手上的教科書','只是外觀，顯示你正在讀哪本',h('div',{class:'books'},...BOOKS.map(b=>{const on=a.book===b.id;
+      return h('button',{class:'bookopt'+(on?' on':''),'aria-pressed':String(on),onclick:()=>setLook('book',b.id)},h('span',{class:'cover',style:b.c?`background:${b.c}`:null}),h('span',{class:'bt'},h('b',{},b.n)));}))));
+  return wrap;
+}
+
+/* ===================== 功法 ===================== */
+function skillState(s){return learned(s.id)?'done':preOK(s)?'open':'lockd';}
+function skillCard(s){const stt=skillState(s);const mine=pathOf(mySchool()).includes(s.id);
+  return h('button',{class:'node '+(stt==='done'?'done':stt==='open'?'open':''),onclick:()=>go('skill',s.id)},
+    h('b',{},s.n),
+    h('span',{class:'tags'},mine?h('span',{class:'tag share'},'本派'):h('span',{class:'tag'},MIND.n),...s.schools.filter(k=>k!==mySchool()).map(schoolTag)),
+    h('span',{class:'st '+stt},stt==='done'?'已習得':stt==='open'?'可修習':'前置未完成'),
+    h('span',{class:'pips'},stepPips(s)),
+    s.pre.length?h('span',{class:'pr'},'前置：'+s.pre.map(x=>(learned(x)?'✓':'')+SK[x].n).join('、')):null);}
+function renderSkills(){
+  const sc=mySchool();const path=new Set(pathOf(sc));
+  const head=h('section',{class:'box'},h('h2',{},'功法',h('em',{},'點功法看讀物、找誰學，並記錄「讀、問、做、成」')),
+    h('div',{class:'filters'},...[['list','清單'],['tree','圖譜']].map(([k,n])=>h('button',{'aria-pressed':String(skillMode===k),onclick:()=>{skillMode=k;render();}},n))));
+  if(skillMode==='tree'){
+    const f=h('div',{class:'filters'});[['all','全部'],...Object.keys(SCHOOLS).map(k=>[k,SCHOOLS[k].en])].forEach(([k,n])=>f.append(h('button',{'aria-pressed':String(filter===k),onclick:()=>{filter=k;render();}},n)));
+    const tree=h('div',{class:'tree'});
+    [[0],[1],[2],[3,4]].forEach((ts,i)=>{const col=h('div',{class:'tier'},h('h3',{},['基礎','心法','共通進階','秘傳與實作'][i]));
+      SKILLS.filter(s=>ts.includes(s.tier)).forEach(s=>{const c=skillCard(s);if(filter!=='all'&&!SCHOOLS[filter].need.has(s.id))c.classList.add('dim');col.append(c);});tree.append(col);});
+    return h('div',{class:'col'},head,h('section',{class:'box'},f,h('div',{style:'overflow-x:auto'},tree)));}
+  const mine=SKILLS.filter(s=>path.has(s.id)),other=SKILLS.filter(s=>!path.has(s.id));
+  const sec=(t,note,list)=>h('section',{class:'box'},h('h2',{},t,h('em',{},note)),list.length?h('div',{class:'skgrid'},...list.map(skillCard)):h('p',{class:'muted'},'沒有功法。'));
+  return h('div',{class:'col'},head,
+    sc?sec(`本派功法（${SCHOOLS[sc].n}）`,`已習得 ${mine.filter(s=>learned(s.id)).length}/${mine.length}，決定境界`,mine):null,
+    sec(`${MIND.n}（其他功法）`,`已習得 ${other.filter(s=>learned(s.id)).length}/${other.length}，學一門加一重`,other));
+}
+function readingList(s){const R=s.reading||[];
+  if(!R.length)return h('p',{class:'muted'},'待補。');
+  return h('div',{class:'reads'},...R.map(x=>h('div',{class:'read'},
+    h('span',{class:'tag '+(x.type==='internal'?'ext':x.type==='paper'?'aqs':'share')},RTYPE[x.type]||'讀物'),
+    h('div',{class:'rt'},h('b',{},x.t),x.ch?h('span',{},x.ch):null,x.note?h('span',{class:'muted'},x.note):null,x.tbc?h('span',{class:'tbc'},TBC):null,
+      x.url?h('a',{href:x.url,target:'_blank',rel:'noopener'},'開啟連結'):null))));}
+function whoTeaches(s){if(!s.by.length)return h('p',{class:'muted'},'還沒有指定學長姐。');
+  return h('div',{class:'acts'},...s.by.map(m=>h('button',{class:'act',onclick:()=>go('master',m.id)},h('span',{class:'mname'},sprite(m.look,2),m.n),
+    h('small',{},Object.keys(m.sched).map(d=>DAYS[d]+placeShort(m.sched[d])).join(' ')||'不定'))));}
+const placeShort=k=>PLACES[k]?PLACES[k].n.replace('休息室','').replace('實驗室',''):'';
+function renderSkill(){
+  const s=SK[sel];if(!s){view='skills';return renderSkills();}
+  const x=st(s.id);const mine=pathOf(mySchool()).includes(s.id);
+  const steps=h('div',{class:'steps'},...STEPS.filter(t=>!t.practice||s.practice).map(t=>h('button',{class:'step'+(x[t.k]?' on':''),'aria-pressed':String(!!x[t.k]),onclick:()=>setStep(s.id,t.k,!x[t.k])},
+    h('b',{},t.n),h('span',{},t.d))));
+  const note=h('textarea',{id:'note-'+s.id,rows:'3',placeholder:'筆記：讀到哪一章、問了誰什麼、還不懂的地方…'});note.value=x.note||'';
+  const saveNote=h('button',{class:'btn',onclick:()=>{S.steps[s.id]={...st(s.id),note:note.value};if(note.value.trim())log(`〈${s.n}〉筆記：${note.value.trim().slice(0,60).replace(/</g,'&lt;')}`);save();render();}},'儲存筆記');
+  return h('div',{class:'col'},
+    h('section',{class:'box'},backBtn(),h('h2',{},s.n,h('em',{},mine?'本派功法':MIND.n)),
+      h('div',{class:'tags'},...s.schools.map(schoolTag),s.schools.length>1?h('span',{class:'tag share'},'共通'):null),
+      s.pre.length?h('p',{class:'muted'},'前置：',...s.pre.map(skillLink)):null,
+      !preOK(s)&&!learned(s.id)?h('p',{class:'away'},'前置功法還沒完成。可以先讀，但建議照順序來。'):null,
+      steps,h('div',{class:'col'},note,h('div',{class:'row'},saveNote))),
+    h('section',{class:'box'},h('h2',{},'藏經閣',h('em',{},'該讀什麼')),readingList(s)),
+    h('section',{class:'box'},h('h2',{},'找誰學',h('em',{},'作息與地點')),whoTeaches(s)));
+}
+
+/* ===================== 藏經閣 ===================== */
+function renderLib(){
+  const path=pathOf(mySchool());const mine=SKILLS.filter(s=>path.includes(s.id)),other=SKILLS.filter(s=>!path.includes(s.id));
+  const empty=SKILLS.filter(s=>!(s.reading||[]).length||s.reading.every(r=>r.note==='待補'||/待補/.test(r.note||''))).length;
+  const tbc=SKILLS.reduce((n,s)=>n+(s.reading||[]).filter(r=>r.tbc).length,0);
+  const sec=(t,list)=>h('section',{class:'box'},h('h2',{},t),...list.map(s=>h('div',{class:'libitem'},
+    h('button',{class:'slink'+(learned(s.id)?' done':''),onclick:()=>go('skill',s.id)},(learned(s.id)?'✓ ':'')+s.n),readingList(s))));
+  return h('div',{class:'col'},
+    h('section',{class:'box'},h('h2',{},'藏經閣',h('em',{},'每門功法該讀的書、論文和實驗室資料')),
+      h('p',{class:'muted'},`還有 ${empty} 門功法的讀物待補，${tbc} 筆章節待確認。讀物清單在 content.json 每門功法的 reading 欄位，可以慢慢補。`)),
+    mine.length?sec('本派功法',mine):null,sec(MIND.n+'（其他功法）',other));
+}
+
+/* ===================== 地圖與房間 ===================== */
+function renderMapView(){
+  const box=h('section',{class:'box'},h('h2',{},'地圖',h('em',{},`房間下方是${DAYS[weekday()]}通常會在那裡的人`)));
+  const fl=p=>p.floor==null||p.floor===''?'校外':p.floor;
+  const floors=[...new Set(Object.values(PLACES).map(fl))].sort((a,b)=>(a==='校外')-(b==='校外')||b-a);
+  const tile=k=>{const P=PLACES[k];const who=MASTERS.filter(m=>m.sched[weekday()]===k);
+    return h('button',{class:'room',onclick:()=>go('room',k)},scene(k,who.map(m=>m.look)),h('b',{},P.n),
+      h('span',{class:'who'},P.study?'自修的地方':who.length?who.map(m=>m.n).join('、'):'今天通常沒人'));};
+  floors.forEach(f=>{const keys=Object.keys(PLACES).filter(k=>fl(PLACES[k])===f);const row=h('div',{class:'rooms'});const groups={};
+    keys.forEach(k=>{const g=PLACES[k].group;if(g){if(!groups[g]){groups[g]=h('div',{class:'suite'},h('span',{class:'suite-n'},g));row.append(groups[g]);}groups[g].append(tile(k));}else row.append(tile(k));});
+    box.append(h('div',{class:'floor'},h('div',{class:'flabel'+(f==='校外'?' out':'')},f==='校外'?'校外':`${f}F`),h('div',{class:'fbody'},row,f==='校外'?null:h('div',{class:'hall'},'走廊'))));});
+  return h('div',{class:'col'},box,renderMasters());
+}
+function renderRoom(){
+  const k=sel,P=PLACES[k];if(!P){view='map';return renderMapView();}
+  const box=h('section',{class:'box'},backBtn('回地圖'),h('h2',{},P.n,h('em',{},P.d||'')));
   if(P.lab&&unsafeShoes()){box.append(scene(k,[],true),h('p',{class:'away'},'門口的學長把你攔下來：「穿拖鞋不能進實驗室！」實驗室規定要穿包覆式的鞋子，避免化學品、液態氮或掉落的光學元件傷到腳。'),
-    h('div',{class:'row'},h('button',{class:'btn',onclick:()=>{S.place=null;view='look';save();render();}},'回去換鞋（不花時間）')));return box;}
-  let any=false;
-  if(k!=='desk'){
-    const here=[],away=[];MASTERS.forEach(m=>{const w=whereIs(m);if(w.loc===k)here.push(m);else if(w.expected===k)away.push([m,w.why]);});
-    box.append(scene(k,here.map(m=>m.look),true));
-    away.forEach(([m,why])=>box.append(h('p',{class:'away'},`${m.n}今天不在，聽說${why}。`)));
-    if(!here.length&&!away.length)box.append(h('p',{class:'muted'},'今天這裡沒有師父。'));
-    here.forEach(m=>{
-      const c=h('div',{class:'mcard'},h('div',{class:'mhead'},h('span',{class:'mname'},sprite(m.look,3),h('b',{},m.n)),h('span',{},masterTag(m),' ',h('span',{class:'tag'},`好感 ${aff(m.id)}`))));
-      const acts=h('div',{class:'acts'});const locks=[];
-      m.teach.forEach(id=>{const s=SK[id];const why=canTeach(m,s);
-        if(!why){any=true;acts.append(h('button',{class:'act',onclick:()=>doAct('teach',{m:m.id,s:id})},`請教〈${s.n}〉`,h('small',{},`${S.prog[id]||0}/${s.cost} · +${aff(m.id)>=5?3:2}`)));}
-        else if(why!=='已習得')locks.push(`〈${s.n}〉${why}`);});
-      if(P.lab){any=true;acts.append(h('button',{class:'act',onclick:()=>doAct('help',{m:m.id})},'協助實驗',h('small',{},m.school===S.school?'好感 +2 · 成果 +1':'好感 +2')));}
-      else{any=true;acts.append(h('button',{class:'act',onclick:()=>doAct('chat',{m:m.id})},'閒聊',h('small',{},'好感 +1')));}
-      c.append(acts);if(locks.length)c.append(h('div',{class:'lock'},'還不能學：'+locks.join('；')));box.append(c);
-    });
-  }
-  if(P.lab){const ok=learned('align');box.append(h('div',{class:'acts'},h('button',{class:'act',disabled:ok?null:'',onclick:()=>doAct('exp')},'自己上桌做實驗',h('small',{},ok?(learned(SCHOOLS[S.school].final)?'成果 +3':'成果 +1'):'需先學〈光路準直〉'))));if(ok)any=true;}
-  if(k==='desk')box.append(scene(k,[playerLook()],true));
-  const self=SKILLS.filter(selfOK);
-  if(!P.lab&&self.length){const g=k==='desk'?2:1;box.append(h('h3',{style:'font-size:1rem;color:var(--dim)'},k==='desk'?'自修':'在這裡讀點書'));
-    const a=h('div',{class:'acts'});self.forEach(s=>a.append(h('button',{class:'act',onclick:()=>doAct('study',{s:s.id})},`〈${s.n}〉`,h('small',{},`${S.prog[s.id]||0}/${s.cost} · +${g+bookBonus(s.id)}${bookBonus(s.id)?'（教科書）':''}`))));box.append(a);any=true;}
-  if(k==='desk'&&!self.length)box.append(h('p',{class:'muted'},'目前沒有可以自修的功法。有書可讀的基礎功法，或已經請教過、入門的功法，才能自修。'));
-  if(!any)box.append(h('button',{class:'act',onclick:()=>doAct('idle')},'今天就這樣吧',h('small',{},'結束這一天')));
-  return box;
+    h('div',{class:'row'},h('button',{class:'btn',onclick:()=>go('me')},'去人物頁換鞋')));return box;}
+  const todayWho=MASTERS.filter(m=>m.sched[weekday()]===k);
+  box.append(scene(k,P.study?[playerLook()]:todayWho.map(m=>m.look),true));
+  const people=MASTERS.filter(m=>Object.values(m.sched).includes(k));
+  const out=h('div',{class:'col'},box);
+  if(people.length)out.append(h('section',{class:'box'},h('h2',{},'常在這裡的人',h('em',{},'點人看專長與會教的功法')),
+    h('div',{class:'acts'},...people.map(m=>h('button',{class:'act',onclick:()=>go('master',m.id)},h('span',{class:'mname'},sprite(m.look,2),m.n,' ',masterTag(m)),
+      h('small',{},Object.keys(m.sched).filter(d=>m.sched[d]===k).map(d=>DAYS[d]).join('、')))))));
+  else if(!P.study)out.append(h('section',{class:'box'},h('p',{class:'muted'},'目前沒有學長姐登記常在這裡。')));
+  if(P.study){const open=SKILLS.filter(s=>!learned(s.id)&&preOK(s));
+    out.append(h('section',{class:'box'},h('h2',{},'在這裡自修',h('em',{},'挑一門可修習的功法')),...open.slice(0,6).map(s=>h('button',{class:'act',onclick:()=>go('skill',s.id)},s.n,h('small',{},stepPips(s))))));}
+  if(P.lab){const T=P.tables||[];
+    out.append(h('section',{class:'box'},h('h2',{},'實驗桌與庫存',h('em',{},'之後補上')),
+      T.length?h('div',{class:'acts'},...T.map(t=>h('div',{class:'mcard'},h('b',{},t.n||'實驗桌'),t.owner&&MS[t.owner]?h('span',{class:'muted'},'負責：'+MS[t.owner].n):null,
+        t.items&&t.items.length?h('span',{class:'muted'},'庫存：'+t.items.join('、')):null))):h('p',{class:'muted'},'待補：這間的實驗桌、負責人和庫存，可以寫在 content.json 這個地點的 tables 欄位。')));}
+  return out;
 }
-function renderTree(){
-  const box=h('section',{class:'box'},h('h2',{},'功法圖譜',h('em',{},'金框：現在就能學 · 綠框：已習得')));
-  const f=h('div',{class:'filters'});[['all','全部'],...Object.keys(SCHOOLS).map(k=>[k,SCHOOLS[k].en])].forEach(([k,n])=>f.append(h('button',{'aria-pressed':String(filter===k),onclick:()=>{filter=k;render();}},n)));
-  box.append(f,h('p',{class:'muted'},'金色「共通」代表兩個以上派系都要學。點派系可以只看那一派的出師路線。'));
-  const tree=h('div',{class:'tree'});
-  [[0],[1],[2],[3,4]].forEach((ts,i)=>{const col=h('div',{class:'tier'},h('h3',{},['基礎','心法','共通進階','秘傳與實作'][i]));
-    SKILLS.filter(s=>ts.includes(s.tier)).forEach(s=>{
-      const done=learned(s.id),open=!done&&preOK(s);const dim=filter!=='all'&&!SCHOOLS[filter].need.has(s.id);
-      const tags=h('div',{class:'tags'},s.schools.length>1?h('span',{class:'tag share'},'共通'):null,...s.schools.map(schoolTag));
-      col.append(h('div',{class:'node'+(done?' done':open?' open':'')+(dim?' dim':'')},
-        h('b',{},s.n),
-        h('span',{class:'st '+(done?'done':open?'open':'lockd')},done?'已習得':open?`可修習 · ${S.prog[s.id]||0}/${s.cost}`:'尚未解鎖'),
-        s.pre.length?h('span',{class:'pr'},'前置：'+s.pre.map(p=>SK[p].n).join('、')):null,
-        h('span',{class:'pr'},s.auto?s.d:'傳授：'+(s.by.map(m=>m.n).join('、')||'—')+(s.book?'（可自修）':'')),
-        tags));});
-    tree.append(col);});
-  box.append(h('div',{style:'overflow-x:auto'},tree));return box;
+function renderMaster(){
+  const m=MS[sel];if(!m){view='map';return renderMapView();}
+  const sch=h('div',{class:'sched'});for(let d=1;d<=5;d++){const l=m.sched[d];sch.append(h('div',{class:d===weekday()?'today':''},h('b',{},DAYS[d]),l?placeShort(l)||'?':'不在'));}
+  return h('div',{class:'col'},h('section',{class:'box'},backBtn(),
+    h('div',{class:'mhead'},h('span',{class:'mname'},sprite(m.look,4),h('h2',{},m.n)),masterTag(m)),
+    h('div',{class:'sheet'},h('div',{},h('span',{},'專長'),h('b',{},m.spec||'待補')),h('div',{},h('span',{},'聯絡方式'),h('b',{},m.contact||'待補')),
+      h('div',{},h('span',{},'請教前準備'),h('b',{},m.prep||'待補'))),
+    h('h3',{},'一週作息'),sch,
+    h('h3',{},'會教的功法'),h('div',{class:'links'},...m.teach.map(skillLink))));
 }
 function renderMasters(){
-  const box=h('section',{class:'box'},h('h2',{},'師父名錄',h('em',{},'金框是今天')));
+  const box=h('section',{class:'box'},h('h2',{},'師門',h('em',{},'金框是今天')));
   const g=h('div',{class:'masters'});
-  MASTERS.forEach(m=>{const sch=h('div',{class:'sched'});for(let d=1;d<=5;d++){const l=m.sched[d];sch.append(h('div',{class:d===S.day?'today':''},h('b',{},DAYS[d]),l?PLACES[l].n.replace('休息室','').replace('實驗室',''):'不在'));}
-    g.append(h('div',{class:'mcard'},h('div',{class:'mhead'},h('span',{class:'mname'},sprite(m.look,3),h('b',{},m.n)),masterTag(m)),
-      h('div',{class:'aff'},'好感',h('div',{class:'bar'},h('div',{style:`width:${aff(m.id)*10}%`})),String(aff(m.id))),
-      sch,h('div',{class:'teach'},'傳授：'+m.teach.map(id=>SK[id].n+(learned(id)?' ✓':'')).join('、'))));});
-  box.append(g,h('p',{class:'muted'},`派系秘傳與實作要好感 ${ADV_AFF} 以上才肯教。請教、閒聊、協助實驗都能增加好感；好感 5 以上，每次請教進度 +3。`));return box;
+  MASTERS.forEach(m=>{const sch=h('div',{class:'sched'});for(let d=1;d<=5;d++){const l=m.sched[d];sch.append(h('div',{class:d===weekday()?'today':''},h('b',{},DAYS[d]),l?placeShort(l)||'?':'不在'));}
+    g.append(h('div',{class:'mcard'},h('div',{class:'mhead'},h('button',{class:'mname plain',onclick:()=>go('master',m.id)},sprite(m.look,3),h('b',{},m.n)),masterTag(m)),
+      sch,h('div',{class:'teach'},'會教：',...m.teach.map(skillLink))));});
+  box.append(g);return box;
 }
 
+/* ===================== 日誌 ===================== */
+function renderLogView(){
+  const ta=h('textarea',{id:'lognote',rows:'3',placeholder:'今天做了什麼、讀到哪裡、下一步要做什麼…'});
+  const add=h('button',{class:'btn',onclick:()=>{const v=ta.value.trim();if(!v)return;log(v.replace(/</g,'&lt;'));save();render();}},'寫進日誌');
+  const ul=h('ul',{class:'log'});S.log.forEach(l=>ul.append(h('li',{html:`<time>${l.t}</time>${l.h}`})));
+  return h('div',{class:'col'},h('section',{class:'box'},h('h2',{},'修煉日誌',h('em',{},'習得功法、突破境界會自動記下')),ta,h('div',{class:'row'},add)),
+    h('section',{class:'box'},S.log.length?ul:h('p',{class:'muted'},'還沒有紀錄。')));
+}
+
+/* ===================== 底部欄 ===================== */
+const DOCK=[{v:'me',n:'人物',i:'look'},{v:'skills',n:'功法',i:'skills'},{v:'lib',n:'藏經閣',i:'book'},{v:'map',n:'地圖',i:'map'},{v:'log',n:'日誌',i:'log'}];
+const DOCK_OF={skill:'skills',room:'map',master:'map'};
+function renderDock(){const d=$('dock');d.innerHTML='';const cur=DOCK_OF[view]||view;
+  DOCK.forEach(o=>d.append(h('button',{class:'dk'+(cur===o.v?' on':''),'aria-current':cur===o.v?'page':null,onclick:()=>{back=null;view=o.v;sel=null;render();window.scrollTo({top:0});}},icon(o.i,3),h('span',{},o.n))));}
+
+/* ===================== 管理者 ===================== */
 function renderAdmin(){
-  const box=h('section',{class:'box'},h('h2',{},'弟子總覽',h('em',{},'只有管理者看得到')));
+  const box=h('section',{class:'box'},backBtn(),h('h2',{},'弟子總覽',h('em',{},'只有管理者看得到。身分與派系在這裡設定')));
   const out=h('div',{class:'col'},box,renderContentBox());
-  if(!PLAYERS.length){box.append(h('p',{class:'muted'},'還沒有人開始玩。在 Firebase 幫學弟妹建立帳號，他們登入後就會出現在這裡。'));return out;}
-  const t=h('table',{class:'ptable'},h('thead',{},h('tr',{},...['弟子','派系','進度','出師','成果','組會平均','最後遊玩'].map(x=>h('th',{},x)))));
+  if(!PLAYERS.length){box.append(h('p',{class:'muted'},'還沒有人登入過。在 Firebase 幫學弟妹建立帳號，他們登入後就會出現在這裡。'));return out;}
+  const t=h('table',{class:'ptable'},h('thead',{},h('tr',{},...['弟子','身分','派系','境界','本派','心法','應達','最後登入'].map(x=>h('th',{},x)))));
   const tb=h('tbody');
   PLAYERS.slice().sort((a,b)=>String(b.d.updatedAt||'').localeCompare(String(a.d.updatedAt||''))).forEach(({id,d})=>{
-    const sc=d.school&&SCHOOLS[d.school];const L=d.learned||{};const need=sc?[...sc.need]:[];const got=need.filter(x=>L[x]).length;
-    const m=d.meetings||[];const avg=m.length?(m.reduce((a,b)=>a+b,0)/m.length).toFixed(1):'—';
+    const ro=ROSTERS[id]||{};const sc=ro.school&&SCHOOLS[ro.school]?ro.school:d.school;const r=realmFor(d.steps||{},sc);const rk=RANKS.find(x=>x.n===ro.rank);
+    const rankSel=h('select',{'aria-label':'身分'},h('option',{value:''},'未設定'),...RANKS.map(x=>h('option',{value:x.n,selected:ro.rank===x.n?'':null},x.n)));
+    rankSel.onchange=()=>setRoster(id,{rank:rankSel.value});
+    const schSel=h('select',{'aria-label':'派系'},h('option',{value:''},'自選'),...Object.keys(SCHOOLS).map(k=>h('option',{value:k,selected:ro.school===k?'':null},SCHOOLS[k].en)));
+    schSel.onchange=()=>setRoster(id,{school:schSel.value});
     const nm=d.nick?`${d.nick}（${d.name||'?'}）`:(d.name||'（未知）');
-    tb.append(h('tr',{},h('td',{},nm),h('td',{},sc?sc.en:'未入門'),h('td',{},d.ended?'學期結束':`W${d.week} ${DAYS[d.day]||''}`),h('td',{},sc?`${got}/${need.length}`:'—'),
-      h('td',{},String(d.res||0)),h('td',{},avg),h('td',{},d.updatedAt?new Date(d.updatedAt).toLocaleString('zh-TW',{month:'numeric',day:'numeric',hour:'2-digit',minute:'2-digit'}):'—')));});
-  t.append(tb);box.append(h('div',{style:'overflow-x:auto'},t));return out;
+    const diff=rk?r.i-rk.expect:null;
+    tb.append(h('tr',{},h('td',{},nm),h('td',{},rankSel),h('td',{},schSel),h('td',{},REALMS[r.i].n),h('td',{},sc?`${r.got}/${r.total}`:'—'),h('td',{},String(mindFor(d.steps||{},sc))),
+      h('td',{class:diff==null?'':diff<0?'bad':'good'},rk?(diff<0?`落後 ${-diff}`:diff>0?'超前':'正常'):'—'),
+      h('td',{},d.updatedAt?new Date(d.updatedAt).toLocaleString('zh-TW',{month:'numeric',day:'numeric',hour:'2-digit',minute:'2-digit'}):'—')));});
+  t.append(tb);box.append(h('div',{style:'overflow-x:auto'},t),h('p',{class:'muted'},'設定會在對方下次開啟遊戲時生效。'));return out;
 }
+async function setRoster(uid,patch){ROSTERS[uid]={...(ROSTERS[uid]||{}),...patch};
+  try{await firebase.firestore().collection('roster').doc(uid).set({...ROSTERS[uid],updatedAt:new Date().toISOString()});$('savest').textContent='已更新弟子設定';}
+  catch(e){$('savest').textContent='更新失敗：'+(e.code||e.message);}render();}
 function renderContentBox(){
   const msg=h('p',{class:'muted'});
   const file=h('input',{type:'file',accept:'.json,application/json',id:'cfile'});
   file.onchange=()=>{const f=file.files[0];if(!f)return;const r=new FileReader();
-    r.onload=async()=>{let c;try{c=JSON.parse(r.result);}catch(e){msg.textContent='檔案不是有效的 JSON。';return;}
+    r.onload=async()=>{let c;try{c=JSON.parse(r.result);}catch(e){msg.textContent='檔案不是有效的 JSON：'+e.message;return;}
       const errs=checkContent(c);if(errs.length){msg.textContent='內容有問題：'+errs.slice(0,5).join('；');return;}
       msg.textContent='上傳中…';
       try{CONTENT_AT=new Date().toISOString();await firebase.firestore().collection('config').doc('content').set({json:JSON.stringify(c),updatedAt:CONTENT_AT});
@@ -655,95 +807,22 @@ function renderContentBox(){
     r.readAsText(f);file.value='';};
   const dl=()=>{const b=new Blob([JSON.stringify(exportContent(),null,2)],{type:'application/json'});const a=document.createElement('a');a.href=URL.createObjectURL(b);a.download='content.json';a.click();setTimeout(()=>URL.revokeObjectURL(a.href),1000);};
   return h('section',{class:'box'},h('h2',{},'遊戲內容',h('em',{},CONTENT_AT?`已上傳自訂內容（${new Date(CONTENT_AT).toLocaleString('zh-TW')}）`:'目前是預設範例')),
-    h('p',{class:'muted'},'師父、派系、功法、作息都在內容檔裡。先下載目前內容、修改後再上傳。內容存在資料庫，只有登入的人讀得到，不會出現在公開的網頁原始碼裡。'),
+    h('p',{class:'muted'},'學期、身分、境界、地點、派系、功法、讀物、師父、教科書都在內容檔裡。先下載目前內容、修改後再上傳。內容存在資料庫，只有登入的人讀得到。'),
     h('div',{class:'row'},h('button',{class:'btn',onclick:dl},'下載目前內容'),h('label',{class:'btn',for:'cfile'},'上傳內容檔',file)),msg);
 }
-/* ===================== 外觀 ===================== */
-function setLook(k,v){S.look={...myLook(),[k]:v};save();render();}
-function renderLook(){
-  const a=myLook();const L=playerLook();
-  const stage=h('section',{class:'box lookstage'},h('h2',{},'外觀',h('em',{},'每次更換都會自動存檔')),
-    h('div',{class:'pedestal'},sprite(L,9)),
-    h('p',{class:'muted',style:'text-align:center'},`${S.nick||ME_NAME}　·　${(AV.outfit.find(o=>o.id===a.outfit)||{}).n||''}`),
-    a.book!=='none'?h('p',{class:'bookfx'},`手上：${bookOf(a.book).n}`):null,
-    unsafeShoes()?h('p',{class:'away'},'穿拖鞋不能進實驗室。實驗室規定要穿包覆式的鞋子，避免化學品、液態氮或掉落的光學元件傷到腳。'):null);
-  const opts=h('div',{class:'col'});
-  const group=(title,note,...kids)=>h('section',{class:'box'},h('h2',{},title,note?h('em',{},note):null),...kids);
-  const chip=(sel,on,...kids)=>h('button',{class:'chip'+(sel?' on':''),'aria-pressed':String(sel),onclick:on},...kids);
-  const prev=over=>sprite(avatarToLook({...a,...over,book:'none'}),2);
-  opts.append(
-    group('髮型',null,h('div',{class:'chips'},...AV.hair.map(o=>chip(a.hair===o.id,()=>setLook('hair',o.id),prev({hair:o.id}),h('span',{},o.n)))),
-      h('h3',{},'髮色'),h('div',{class:'swatches'},...AV.hairColor.map((c,i)=>h('button',{class:'sw'+(a.hc===i?' on':''),style:`background:${c}`,'aria-label':'髮色 '+(i+1),'aria-pressed':String(a.hc===i),onclick:()=>setLook('hc',i)})))),
-    group('膚色',null,h('div',{class:'swatches'},...AV.skin.map((c,i)=>h('button',{class:'sw'+(a.sk===i?' on':''),style:`background:${c}`,'aria-label':'膚色 '+(i+1),'aria-pressed':String(a.sk===i),onclick:()=>setLook('sk',i)})))),
-    group('套裝',null,h('div',{class:'chips'},...AV.outfit.map(o=>chip(a.outfit===o.id,()=>setLook('outfit',o.id),prev({outfit:o.id}),h('span',{},o.n))))),
-    group('鞋子','實驗室只能穿包覆式的鞋',h('div',{class:'chips'},...AV.shoe.map(o=>chip(a.shoe===o.id,()=>setLook('shoe',o.id),prev({shoe:o.id}),h('span',{},o.n+(o.unsafe?'（不能進實驗室）':'')))))),
-    group('手上的教科書','自修書裡的功法，進度多 +1',h('div',{class:'books'},...BOOKS.map(b=>{const sel=a.book===b.id;
-      return h('button',{class:'bookopt'+(sel?' on':''),'aria-pressed':String(sel),onclick:()=>setLook('book',b.id)},
-        h('span',{class:'cover',style:b.c?`background:${b.c}`:''}),
-        h('span',{class:'bt'},h('b',{},b.n),h('small',{},b.skills.length?'加成：'+b.skills.filter(id=>SK[id]).map(id=>SK[id].n).join('、'):'空手')));})))
-  );
-  return h('div',{class:'lookmain'},h('div',{class:'col'},stage),opts);
-}
-const bookBonus=id=>{const b=bookOf(myLook().book);return b.skills.includes(id)?1:0;};
 
-/* ===================== 功法 ===================== */
-let skillMode='list';
-function renderSkills(){
-  const all=SKILLS.filter(s=>!s.auto||learned(s.id));
-  const done=all.filter(s=>learned(s.id)),open=all.filter(s=>!learned(s.id)&&preOK(s)),locked=all.filter(s=>!learned(s.id)&&!preOK(s));
-  const head=h('section',{class:'box'},h('h2',{},'功法',h('em',{},`已習得 ${done.length} · 可修習 ${open.length} · 未解鎖 ${locked.length}`)),
-    h('div',{class:'filters'},...[['list','清單'],['tree','圖譜']].map(([k,n])=>h('button',{'aria-pressed':String(skillMode===k),onclick:()=>{skillMode=k;render();}},n))));
-  if(skillMode==='tree')return h('div',{class:'col'},head,renderTree());
-  const mine=S.school?SCHOOLS[S.school].need:new Set();
-  const card=s=>{const st=learned(s.id)?'done':preOK(s)?'open':'lockd';const p=S.prog[s.id]||0;
-    const where=s.by.map(m=>{const days=Object.keys(m.sched).map(d=>DAYS[d]+(PLACES[m.sched[d]]?PLACES[m.sched[d]].n.replace('休息室','').replace('實驗室',''):'')).join(' ');return`${m.n}（${days||'不定'}）`;}).join('、');
-    return h('div',{class:'node '+(st==='done'?'done':st==='open'?'open':'')},
-      h('b',{},s.n,mine.has(s.id)?h('span',{class:'tag share',style:'margin-left:6px'},'本派'):null),
-      h('span',{class:'st '+st},st==='done'?'已習得':st==='open'?`可修習 · ${p}/${s.cost}`:'尚未解鎖'),
-      st==='open'&&s.cost?h('div',{class:'bar'},h('div',{style:`width:${p/s.cost*100}%`})):null,
-      s.pre.length?h('span',{class:'pr'},'前置：'+s.pre.map(x=>(learned(x)?'✓':'')+SK[x].n).join('、')):null,
-      !s.auto?h('span',{class:'pr'},'找誰學：'+(where||'—')+(s.book?'；也可以自修':'')):h('span',{class:'pr'},s.d||''),
-      BOOKS.some(b=>b.id!=='none'&&b.skills.includes(s.id))?h('span',{class:'pr'},'推薦教科書：'+BOOKS.filter(b=>b.skills.includes(s.id)).map(b=>b.short||b.n).join('、')):null);};
-  const sec=(t,list,empty)=>h('section',{class:'box'},h('h2',{},t,h('em',{},`${list.length} 門`)),list.length?h('div',{class:'skgrid'},...list.map(card)):h('p',{class:'muted'},empty));
-  return h('div',{class:'col'},head,sec('可修習',open,'目前沒有可以修習的功法。'),sec('已習得',done,'還沒有習得任何功法。'),sec('未解鎖',locked,'所有功法都解鎖了。'));
+/* ===================== 初次選派系 ===================== */
+function pickSchool(){
+  overlay((b,close)=>{
+    b.append(h('h1',{},'拜入哪一派？'),h('p',{class:'muted'},'依你負責或想加入的實驗桌選。之後管理者也可以幫你調整。'));
+    const p=h('div',{class:'pick'});
+    for(const k in SCHOOLS){const sc=SCHOOLS[k];const head=MASTERS.find(m=>m.school===k);
+      p.append(h('button',{onclick:()=>{S.school=k;log(`拜入<b>${sc.n}</b>。`);close();save();render();}},
+        h('span',{class:'mname'},head?sprite(head.look,3):null,h('b',{},`${sc.n}　${sc.en}`)),h('span',{},sc.d),h('span',{},`本派功法 ${sc.need.size} 門 · 師父：${head?head.n:'—'}`)));}
+    b.append(p);});
 }
 
-/* ===================== 地圖 ===================== */
-function renderMap(){
-  const box=h('section',{class:'box'},h('h2',{},'今天要去哪裡？',h('em',{},'點地圖上的房間前往，一天只能去一個地方')));
-  const floors=[...new Set(Object.values(PLACES).map(p=>p.floor||5))].sort((a,b)=>b-a);
-  const tile=k=>{const P=PLACES[k];const who=MASTERS.filter(m=>m.sched[S.day]===k);const blocked=P.lab&&unsafeShoes();
-    return h('button',{class:'room'+(blocked?' blocked':''),onclick:()=>{S.place=k;save();render();}},
-      scene(k,who.map(m=>m.look)),h('b',{},P.n),
-      h('span',{class:'who'},blocked?'穿拖鞋不能進入':k==='desk'?'自修（進度 +2）':who.length?who.map(m=>m.n).join('、'):'通常沒有師父'));};
-  floors.forEach(f=>{
-    const keys=Object.keys(PLACES).filter(k=>(PLACES[k].floor||5)===f);
-    const row=h('div',{class:'rooms'});const groups={};
-    keys.forEach(k=>{const g=PLACES[k].group;if(g){if(!groups[g]){groups[g]=h('div',{class:'suite'},h('span',{class:'suite-n'},g));row.append(groups[g]);}groups[g].append(tile(k));}else row.append(tile(k));});
-    box.append(h('div',{class:'floor'},h('div',{class:'flabel'},`${f}F`),h('div',{class:'fbody'},row,h('div',{class:'hall'},'走廊'))));
-  });
-  box.append(h('p',{class:'muted'},`房間下方是${DAYS[S.day]}「通常」會在那裡的師父，偶爾會臨時不在。下方「師父名錄」可以查每個人的一週作息。`));
-  return box;
-}
-
-/* ===================== 底部欄 ===================== */
-const DOCK=[{v:'look',n:'外觀',i:'look'},{v:'skills',n:'功法',i:'skills'},{v:'map',n:'地圖',i:'map'},{v:'t4',n:'待定',i:'lock',off:true},{v:'t5',n:'待定',i:'lock',off:true}];
-function renderDock(){const d=$('dock');d.innerHTML='';
-  DOCK.forEach(o=>d.append(h('button',{class:'dk'+(view===o.v?' on':''),disabled:o.off?'':null,title:o.off?'即將開放':o.n,'aria-current':view===o.v?'page':null,
-    onclick:()=>{if(o.off)return;view=o.v;render();window.scrollTo({top:0});}},icon(o.i,3),h('span',{},o.n))));}
-
-$('tab-admin').onclick=()=>{view='admin';render();window.scrollTo({top:0});};
-let armed=false;
-$('reset').onclick=e=>{if(!armed){armed=true;e.target.textContent='再按一次確認重來';setTimeout(()=>{armed=false;e.target.textContent='重新開始';},3000);return;}
-  armed=false;e.target.textContent='重新開始';S=fresh();save();start();};
-
-(()=>{const c=$('stars'),x=c.getContext('2d');let st=[];const rm=matchMedia('(prefers-reduced-motion: reduce)').matches;
-  const size=()=>{c.width=innerWidth*devicePixelRatio;c.height=innerHeight*devicePixelRatio;st=Array.from({length:80},()=>({x:Math.random()*c.width,y:Math.random()*c.height,r:Math.random()*1.3*devicePixelRatio+.3,p:Math.random()*6}));};
-  size();addEventListener('resize',size);
-  const f=t=>{x.clearRect(0,0,c.width,c.height);st.forEach(s=>{x.globalAlpha=Math.sin(t/900+s.p)>0?.55:.2;x.fillStyle='#e9dfc3';const z=Math.max(2,Math.round(s.r*1.5));x.fillRect(Math.round(s.x),Math.round(s.y),z,z);});if(!rm)requestAnimationFrame(f);};
-  requestAnimationFrame(f);})();
-
-function showMe(){$('me').replaceChildren(sprite(playerLook(),2),h('span',{},'弟子：'+(S&&S.nick||ME_NAME)));}
+/* ===================== 帳號 ===================== */
 function gate(t,d,form){$('gate').hidden=false;$('app').hidden=true;$('gate-t').textContent=t;$('gate-d').textContent=d;$('login').hidden=!form;}
 const CFG=window.FIREBASE_CONFIG||{};
 const DOMAIN=window.LOGIN_DOMAIN||'lab533.example.com';
@@ -753,20 +832,29 @@ const ERR={'auth/invalid-credential':'帳號或密碼不正確。','auth/wrong-p
   'auth/user-disabled':'這個帳號已被停用，請找管理者。','auth/weak-password':'密碼至少要 6 個字元。','auth/requires-recent-login':'為了安全，請先登出再登入一次，然後馬上改密碼。'};
 const DEFAULT_CONTENT=exportContent();
 $('gate-art').append(scene('lab',[{hair:'#3b2a1f',robe:'#d8d2ea',belt:'#8a80a8'},MASTERS[2]&&MASTERS[2].look||TEACHER],true));
+function migrate(){
+  if(!S.steps)S.steps={};
+  if(S.learned&&typeof S.learned==='object'){for(const id in S.learned)if(S.learned[id]&&SK[id]&&!S.steps[id])S.steps[id]={read:true,ask:true,do:true,done:true};}
+  ['learned','prog','aff','res','resSince','learnSince','meetings','week','day','place','ended'].forEach(k=>delete S[k]);
+  for(const id in S.steps)if(!SK[id])delete S.steps[id];
+  if(S.school&&!SCHOOLS[S.school])S.school=null;
+  S.realmSeen=Math.max(S.realmSeen||0,myRealm().i);
+}
 if(!window.firebase||!CFG.apiKey||String(CFG.apiKey).startsWith('請')){gate('尚未完成設定','管理者還沒填好 firebase-config.js，請參考 README 的設定步驟。',false);}
 else{
-  firebase.initializeApp(CFG);const AUTH=firebase.auth(),FS=firebase.firestore();let UNSUB=null;
+  firebase.initializeApp(CFG);const AUTH=firebase.auth(),FS=firebase.firestore();let UNSUB=[];
   $('login').onsubmit=async e=>{e.preventDefault();$('lg-err').textContent='';$('lg-btn').disabled=true;
     try{await AUTH.signInWithEmailAndPassword(toEmail($('lg-user').value),$('lg-pass').value);$('lg-pass').value='';}
     catch(err){$('lg-err').textContent=ERR[err.code]||('登入失敗（'+err.code+'）');}
     $('lg-btn').disabled=false;};
   $('logout').onclick=()=>AUTH.signOut();
+  $('tab-admin').onclick=()=>go('admin');
   $('nick').onclick=()=>overlay((b,close)=>{
-    const inp=h('input',{id:'nk',maxlength:'16',value:S.nick||ME_NAME}),er=h('p',{class:'err'});
+    const inp=h('input',{id:'nk',maxlength:'16'});inp.value=S.nick||ME_NAME;const er=h('p',{class:'err'});
     const f=h('form',{class:'login',style:'max-width:none'},h('label',{for:'nk'},'遊戲中顯示的名稱（道號），最多 16 字',inp),er,
       h('div',{class:'row'},h('button',{class:'btn',type:'submit'},'儲存'),h('button',{class:'link',type:'button',onclick:close},'取消')));
     f.onsubmit=async e=>{e.preventDefault();const v=inp.value.trim();if(!v){er.textContent='名稱不能空白。';return;}
-      S.nick=v===ME_NAME?'':v;showMe();await save();close();};
+      S.nick=v===ME_NAME?'':v;await save();close();render();};
     b.append(h('h1',{},'更改名稱'),h('p',{class:'muted'},`登入帳號仍是「${ME_NAME}」，這裡只改遊戲裡顯示的名字。`),f);});
   $('pw').onclick=()=>overlay((b,close)=>{
     const p1=h('input',{type:'password',id:'pw1',autocomplete:'new-password'}),p2=h('input',{type:'password',id:'pw2',autocomplete:'new-password'}),er=h('p',{class:'err'});
@@ -777,9 +865,9 @@ else{
       catch(err){er.textContent=ERR[err.code]||('更改失敗（'+err.code+'）');}};
     b.append(h('h1',{},'更改密碼'),f);});
   AUTH.onAuthStateChanged(async u=>{
-    if(UNSUB){UNSUB();UNSUB=null;}
+    UNSUB.forEach(f=>f());UNSUB=[];
     document.querySelectorAll('.ov').forEach(o=>o.remove());
-    if(!u){REF=null;ADMIN=false;PLAYERS=[];$('tab-admin').hidden=true;view='map';gate('光道修仙錄','請用管理者給你的帳號密碼登入。',true);return;}
+    if(!u){REF=null;ADMIN=false;PLAYERS=[];ROSTERS={};ROSTER={};$('tab-admin').hidden=true;view='map';gate('光道修仙錄','請用管理者給你的帳號密碼登入。',true);return;}
     gate('光道修仙錄','正在讀取修煉進度…',false);
     ME_NAME=(u.email||'').split('@')[0];
     applyContent(DEFAULT_CONTENT);CONTENT_AT='';
@@ -789,14 +877,16 @@ else{
     try{const snap=await REF.get();S=snap.exists?Object.assign(fresh(),snap.data()):fresh();}
     catch(e){return gate('讀取失敗','無法讀取存檔（'+(e.code||e.message)+'）。請重新整理，或請管理者確認 Firestore 規則。',false);}
     delete S.updatedAt;delete S.name;
-    for(const id in S.learned)if(!SK[id])delete S.learned[id];
-    if(S.school&&!SCHOOLS[S.school])S.school=null;
-    showMe();
+    try{const rs=await FS.collection('roster').doc(u.uid).get();ROSTER=rs.exists?rs.data():{};}catch(e){ROSTER={};}
+    migrate();
     try{ADMIN=(await FS.collection('admins').doc(u.uid).get()).exists;}catch(e){ADMIN=false;}
     $('tab-admin').hidden=!ADMIN;
-    if(ADMIN)UNSUB=FS.collection('players').onSnapshot(q=>{PLAYERS=q.docs.map(x=>({id:x.id,d:x.data()}));if(view==='admin')render();},()=>{});
+    if(ADMIN){UNSUB.push(FS.collection('players').onSnapshot(q=>{PLAYERS=q.docs.map(x=>({id:x.id,d:x.data()}));if(view==='admin')render();},()=>{}));
+      UNSUB.push(FS.collection('roster').onSnapshot(q=>{q.docs.forEach(x=>{ROSTERS[x.id]=x.data();});if(view==='admin')render();},()=>{}));}
     $('gate').hidden=true;$('app').hidden=false;
-    start();if(S.ended)ending();
+    if(!S.log.length)log('踏入五三三光學宗山門。');
+    save();render();
+    if(!mySchool())pickSchool();
   });
 }
 </script>

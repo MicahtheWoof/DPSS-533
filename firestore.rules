@@ -5,10 +5,15 @@ service cloud.firestore {
     function isAdmin() {
       return signedIn() && exists(/databases/$(database)/documents/admins/$(request.auth.uid));
     }
-    // 每個人只能讀寫自己的存檔；管理者可以讀所有人的存檔
+    // 每個人只能讀寫自己的修煉紀錄；管理者可以讀所有人的
     match /players/{uid} {
       allow read, write: if signedIn() && request.auth.uid == uid;
       allow read: if isAdmin();
+    }
+    // 身分與派系：由管理者設定，本人只能讀
+    match /roster/{uid} {
+      allow read: if signedIn() && (request.auth.uid == uid || isAdmin());
+      allow write: if isAdmin();
     }
     // 遊戲內容：登入的人才能讀，只有管理者能改
     match /config/{doc} {
