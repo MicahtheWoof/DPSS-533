@@ -1,0 +1,535 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>光道修仙錄</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=LXGW+WenKai+TC:wght@400;700&family=Noto+Serif+TC:wght@400;600;900&display=swap">
+<style>
+/* Layout: a night-sky scroll. Semester timeline on top, then three views (今日行動 / 功法圖譜 / 師父名錄). Deliberately single dark theme. */
+:root{
+  --sky:#0d1020; --sky2:#151a33; --panel:#191f3b; --edge:#2e3763; --ink:#ece6d6; --dim:#a6a3b8;
+  --gold:#e3b75a; --jade:#5fc7a3; --blood:#e0605a; --beam:#ff4f6d; --mist:#8fa4ff;
+  --f-dis:"LXGW WenKai TC","Noto Serif TC","Songti TC",serif;
+  --f-body:"Noto Serif TC","PMingLiU","Songti TC",serif;
+  color-scheme:dark;
+}
+*{box-sizing:border-box}
+[hidden]{display:none!important}
+:root{padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+body{margin:0;background:radial-gradient(1200px 600px at 50% -10%,#2a2457 0%,transparent 60%),var(--sky);color:var(--ink);font-family:var(--f-body);font-size:15px;line-height:1.7;
+  padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));padding-block:18px 40px}
+canvas#stars{position:fixed;inset:0;width:100%;height:100%;pointer-events:none;z-index:0}
+.wrap{position:relative;z-index:1;max-width:1000px;margin:0 auto;display:flex;flex-direction:column;gap:16px}
+button{font:inherit;color:inherit;cursor:pointer}
+button:focus-visible{outline:2px solid var(--gold);outline-offset:2px}
+h1,h2,h3{font-family:var(--f-dis);font-weight:700;margin:0;text-wrap:balance}
+p{margin:0}
+.top{display:flex;flex-direction:column;gap:10px;text-align:center}
+.sect{font-family:var(--f-dis);color:var(--dim);letter-spacing:.4em;font-size:.85rem}
+.date{font-family:var(--f-dis);font-size:clamp(1.9rem,6vw,2.8rem);line-height:1.2;color:var(--gold);text-shadow:0 0 24px rgba(227,183,90,.3)}
+.date small{display:block;font-size:.9rem;color:var(--dim);text-shadow:none;letter-spacing:.08em}
+.tl{display:grid;grid-template-columns:repeat(18,1fr);gap:3px}
+.tl div{height:8px;border-radius:2px;background:var(--edge);position:relative}
+.tl div.past{background:#6b5a33}.tl div.now{background:var(--gold);box-shadow:0 0 10px rgba(227,183,90,.6)}
+.tl div.ev::after{content:"";position:absolute;left:50%;top:-5px;width:4px;height:4px;border-radius:50%;background:var(--beam);transform:translateX(-50%)}
+.tll{display:grid;grid-template-columns:repeat(18,1fr);gap:3px;font-size:.72rem;color:var(--dim);white-space:nowrap;text-align:left}
+.week{display:grid;grid-template-columns:repeat(5,1fr);gap:6px}
+.week div{background:var(--panel);border:1px solid var(--edge);border-radius:6px;padding:6px 4px;font-size:.8rem;text-align:center;line-height:1.35}
+.week div b{display:block;font-family:var(--f-dis);font-size:.95rem}
+.week div.past{opacity:.4}.week div.now{border-color:var(--gold);box-shadow:inset 0 0 0 1px var(--gold)}
+.week i{font-style:normal;font-size:.7rem;color:var(--beam)}
+.stats{display:grid;grid-template-columns:repeat(4,1fr);gap:10px}
+.stat{background:var(--panel);border:1px solid var(--edge);border-radius:8px;padding:9px 12px;min-width:0}
+.stat span{font-size:.76rem;color:var(--dim);letter-spacing:.08em}
+.stat b{display:block;font-family:var(--f-dis);font-size:1.2rem;font-variant-numeric:tabular-nums;line-height:1.35;overflow-wrap:anywhere}
+.bar{height:5px;background:var(--sky2);border-radius:3px;overflow:hidden;margin-top:4px}
+.bar div{height:100%;background:linear-gradient(90deg,#8e6b2a,var(--gold))}
+.tabs{display:flex;gap:6px;border-bottom:1px solid var(--edge);flex-wrap:wrap}
+.tabs button{background:none;border:0;border-bottom:2px solid transparent;padding:8px 14px;font-family:var(--f-dis);font-size:1.05rem;color:var(--dim);margin-bottom:-1px}
+.tabs button[aria-selected="true"]{color:var(--gold);border-bottom-color:var(--gold)}
+.box{background:var(--panel);border:1px solid var(--edge);border-radius:10px;padding:16px;display:flex;flex-direction:column;gap:12px;min-width:0}
+.box h2{font-size:1.2rem;color:var(--gold);display:flex;justify-content:space-between;align-items:baseline;gap:8px;flex-wrap:wrap}
+.box h2 em{font-style:normal;font-size:.8rem;color:var(--dim);font-family:var(--f-body);font-weight:400}
+.muted{color:var(--dim);font-size:.88rem}
+.places{display:grid;grid-template-columns:repeat(auto-fill,minmax(170px,1fr));gap:10px}
+.place{text-align:left;background:var(--sky2);border:1px solid var(--edge);border-radius:8px;padding:12px;display:flex;flex-direction:column;gap:6px}
+.place:hover{border-color:var(--gold)}
+.place b{font-family:var(--f-dis);font-size:1.1rem;color:var(--ink)}
+.place span{font-size:.8rem;color:var(--dim);line-height:1.5}
+.place .who{color:var(--mist);font-size:.82rem}
+.main{display:grid;grid-template-columns:1.4fr 1fr;gap:16px;align-items:start}
+.col{display:flex;flex-direction:column;gap:16px;min-width:0}
+.mcard{background:var(--sky2);border:1px solid var(--edge);border-radius:8px;padding:12px;display:flex;flex-direction:column;gap:8px}
+.mhead{display:flex;justify-content:space-between;align-items:baseline;gap:8px;flex-wrap:wrap}
+.mhead b{font-family:var(--f-dis);font-size:1.15rem}
+.tag{display:inline-block;font-size:.72rem;padding:1px 7px;border-radius:10px;border:1px solid var(--edge);color:var(--dim);white-space:nowrap}
+.tag.pqs{border-color:#c97a4a;color:#f0a77a}.tag.aqs{border-color:#6f8be0;color:#a9bbff}.tag.raman{border-color:#4fae8c;color:#86dcbb}
+.tag.share{border-color:var(--gold);color:var(--gold)}.tag.ext{border-color:#9b7fd0;color:#c8b2f2}
+.acts{display:flex;flex-direction:column;gap:6px}
+.act{text-align:left;background:var(--panel);border:1px solid var(--edge);border-radius:6px;padding:8px 12px;font-size:.9rem;display:flex;justify-content:space-between;gap:10px;align-items:center}
+.act:hover:not(:disabled){border-color:var(--gold)}
+.act:disabled{opacity:.45;cursor:default}
+.act small{color:var(--dim);font-size:.78rem;white-space:nowrap;font-variant-numeric:tabular-nums}
+.lock{font-size:.8rem;color:var(--dim);padding-left:2px}
+.away{font-size:.85rem;color:var(--dim);border-left:2px solid var(--blood);padding-left:10px}
+.btn{background:transparent;border:1px solid var(--gold);color:var(--gold);border-radius:6px;padding:9px 16px;font-family:var(--f-dis);font-size:1.02rem}
+.btn:hover:not(:disabled){background:rgba(227,183,90,.12)}
+.log{max-height:360px;overflow-y:auto;display:flex;flex-direction:column;gap:6px;font-size:.85rem;color:var(--dim);margin:0;padding:0;list-style:none}
+.log li{border-bottom:1px solid var(--edge);padding-bottom:6px}
+.log li b{color:var(--ink);font-weight:600}
+.log time{color:#6d73a0;margin-right:6px;font-size:.75rem;font-variant-numeric:tabular-nums}
+.filters{display:flex;gap:6px;flex-wrap:wrap}
+.filters button{background:var(--sky2);border:1px solid var(--edge);border-radius:14px;padding:4px 12px;font-size:.85rem}
+.filters button[aria-pressed="true"]{border-color:var(--gold);color:var(--gold)}
+.tree{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px}
+.tier{display:flex;flex-direction:column;gap:8px;min-width:0}
+.tier h3{font-size:.95rem;color:var(--dim);letter-spacing:.1em}
+.node{background:var(--sky2);border:1px solid var(--edge);border-radius:8px;padding:10px;display:flex;flex-direction:column;gap:5px;font-size:.8rem;line-height:1.5;transition:opacity .2s}
+.node b{font-family:var(--f-dis);font-size:1rem;line-height:1.35}
+.node.dim{opacity:.22}
+.node.done{border-color:rgba(95,199,163,.6)}
+.node.open{border-color:var(--gold)}
+.node .st{font-size:.72rem}
+.node .st.done{color:var(--jade)}.node .st.open{color:var(--gold)}.node .st.lockd{color:var(--dim)}
+.node .pr{color:var(--dim)}
+.node .tags{display:flex;gap:4px;flex-wrap:wrap}
+.masters{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:12px}
+.sched{display:grid;grid-template-columns:repeat(5,1fr);gap:3px;font-size:.72rem;text-align:center}
+.sched div{background:var(--panel);border-radius:4px;padding:3px 2px;line-height:1.35}
+.sched div b{display:block;color:var(--dim);font-weight:400}
+.sched div.today{outline:1px solid var(--gold)}
+.aff{display:flex;align-items:center;gap:8px;font-size:.8rem;color:var(--dim)}
+.aff .bar{flex:1;margin:0}
+.aff .bar div{background:var(--mist)}
+.teach{font-size:.82rem;color:var(--dim);line-height:1.6}
+.ov{position:fixed;inset:0;z-index:20;background:rgba(5,6,14,.88);display:flex;align-items:center;justify-content:center;
+  padding:max(16px,env(safe-area-inset-top,0px)) max(16px,env(safe-area-inset-right,0px)) max(16px,env(safe-area-inset-bottom,0px)) max(16px,env(safe-area-inset-left,0px))}
+.ovb{width:min(620px,100%);max-height:100%;overflow-y:auto;background:var(--panel);border:1px solid var(--gold);border-radius:12px;padding:22px;display:flex;flex-direction:column;gap:14px}
+.ovb h1{font-size:1.7rem;color:var(--gold);text-align:center}
+.pick{display:flex;flex-direction:column;gap:10px}
+.pick button{text-align:left;background:var(--sky2);border:1px solid var(--edge);border-radius:8px;padding:12px 14px;display:flex;flex-direction:column;gap:4px}
+.pick button:hover{border-color:var(--gold)}
+.pick b{font-family:var(--f-dis);font-size:1.15rem}
+.pick span{font-size:.85rem;color:var(--dim)}
+.sum{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;text-align:center}
+.sum div{background:var(--sky2);border-radius:8px;padding:10px}
+.sum b{display:block;font-family:var(--f-dis);font-size:1.5rem;color:var(--gold)}
+.sum span{font-size:.78rem;color:var(--dim)}
+.appc{display:flex;flex-direction:column;gap:16px}
+.gate{max-width:520px;width:100%;margin:12vh auto 0;text-align:center;align-items:center}
+.gate h1{font-size:1.6rem;color:var(--gold)}
+.me{font-size:.85rem;color:var(--mist)}
+.ptable{width:100%;border-collapse:collapse;font-size:.88rem;font-variant-numeric:tabular-nums}
+.ptable th,.ptable td{text-align:left;padding:8px 10px;border-bottom:1px solid var(--edge);white-space:nowrap}
+.ptable th{color:var(--dim);font-weight:400;font-size:.8rem}
+.login{display:flex;flex-direction:column;gap:12px;width:100%;max-width:320px;text-align:left}
+.login label{display:flex;flex-direction:column;gap:4px;font-size:.85rem;color:var(--dim)}
+.login input{font:inherit;color:var(--ink);background:var(--sky2);border:1px solid var(--edge);border-radius:6px;padding:9px 12px}
+.login input:focus{outline:2px solid var(--gold);outline-offset:1px}
+.err{color:var(--blood);font-size:.85rem;min-height:1.2em}
+.row{display:flex;gap:10px;flex-wrap:wrap;align-items:center}
+.row input[type=file]{display:none}
+.foot{display:flex;justify-content:space-between;gap:8px;flex-wrap:wrap;font-size:.78rem;color:var(--dim)}
+.link{background:none;border:0;color:var(--dim);text-decoration:underline;padding:0;font-size:.78rem}
+@media (max-width:820px){.main{grid-template-columns:1fr}.tree{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media (max-width:520px){.stats{grid-template-columns:repeat(2,1fr)}.tree{grid-template-columns:1fr}}
+@media (prefers-reduced-motion:reduce){*{transition:none!important}}
+</style>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
+<script src="firebase-config.js"></script>
+</head>
+<body>
+
+<canvas id="stars"></canvas>
+<div class="wrap">
+  <section class="box gate" id="gate">
+    <div class="sect">五三三 · 光學宗</div>
+    <h1 id="gate-t">光道修仙錄</h1>
+    <p class="muted" id="gate-d">正在連線…</p>
+    <form class="login" id="login" hidden>
+      <label for="lg-user">帳號<input id="lg-user" autocomplete="username" autocapitalize="off" required></label>
+      <label for="lg-pass">密碼<input id="lg-pass" type="password" autocomplete="current-password" required></label>
+      <button class="btn" id="lg-btn" type="submit">登入</button>
+      <p class="err" id="lg-err"></p>
+    </form>
+  </section>
+  <div class="appc" id="app" hidden>
+  <section class="top">
+    <div class="sect">五三三 · 光學宗</div>
+    <div class="date" id="date">第 1 週 · 週一</div>
+    <div class="me" id="me"></div>
+    <div>
+      <div class="tl" id="tl"></div>
+      <div class="tll"><span style="grid-column:1/3">開學</span><span style="grid-column:8/11;text-align:center">期中</span><span style="grid-column:16/18;text-align:right">期末</span><span style="grid-column:18/19;text-align:right">發表</span></div>
+    </div>
+    <div class="week" id="week"></div>
+  </section>
+  <section class="stats">
+    <div class="stat"><span>派系</span><b id="s-school">未入門</b></div>
+    <div class="stat"><span>出師進度</span><b id="s-path">0 / 0</b><div class="bar"><div id="s-pathbar"></div></div></div>
+    <div class="stat"><span>實驗成果</span><b id="s-res">0</b></div>
+    <div class="stat"><span>下次組會</span><b id="s-meet">—</b></div>
+  </section>
+  <nav class="tabs" role="tablist">
+    <button role="tab" data-v="act" aria-selected="true">今日行動</button>
+    <button role="tab" data-v="tree" aria-selected="false">功法圖譜</button>
+    <button role="tab" data-v="masters" aria-selected="false">師父名錄</button>
+    <button role="tab" data-v="admin" aria-selected="false" id="tab-admin" hidden>弟子總覽</button>
+  </nav>
+  <div id="view"></div>
+  <div class="foot"><span>樣本原型：師父名號、派系、功法與作息皆為範例，可換成 533 的實際內容。進度存在你的帳號，換裝置登入也能接著玩。</span><span id="savest"></span><span class="row"><button class="link" id="nick">改名稱</button><button class="link" id="pw">改密碼</button><button class="link" id="logout">登出</button><button class="link" id="reset">重新開始</button></span></div>
+  </div>
+</div>
+
+<script>
+/* ===================== 可編輯資料區 ===================== */
+// 地點
+let PLACES={
+  big:{n:'大間休息室',d:'人最多，午餐時間特別熱鬧。'},
+  small:{n:'小間休息室',d:'比較安靜，常有人在讀 paper、推公式。'},
+  friend:{n:'友情實驗室',d:'隔壁友好的實驗室，有我們沒有的專長。'},
+  lab:{n:'實驗區',d:'各派系的光學桌。可協助師父做實驗，或自己動手。'},
+  desk:{n:'自己的座位',d:'安靜讀書、看課本與 paper。'}
+};
+// 派系：final 是出師要練成的功法，其前置知識會自動展開
+let SCHOOLS={
+  pqs:{n:'被動調Q派',en:'PQS',d:'以可飽和吸收體控制共振腔 Q 值，產生奈秒脈衝。',final:'pqs_build'},
+  aqs:{n:'主動調Q派',en:'AQS',d:'以聲光或電光調制器主動開關共振腔。',final:'aqs_build'},
+  raman:{n:'連續拉曼派',en:'CW Raman',d:'利用受激拉曼散射，把雷射轉換到新的波長。',final:'raman_build'}
+};
+// 功法：tier 0 基礎、1 心法、2 共通、3 派系秘傳、4 實作；book 表示可以自修；cost 為需要的修習天數（點數）
+let SKILLS=[
+  {id:'safety',n:'雷射安全',tier:0,cost:0,pre:[],auto:true,d:'第一週安全講習自動習得。'},
+  {id:'geo',n:'幾何光學',tier:0,cost:3,pre:[],book:true},
+  {id:'four',n:'四能階系統',tier:0,cost:3,pre:[],book:true},
+  {id:'nlo',n:'非線性光學基礎',tier:0,cost:4,pre:[],book:true},
+  {id:'gauss',n:'高斯光束',tier:1,cost:3,pre:['geo'],book:true},
+  {id:'rate',n:'速率方程',tier:1,cost:4,pre:['four']},
+  {id:'align',n:'光路準直',tier:1,cost:3,pre:['safety']},
+  {id:'measure',n:'功率與光譜量測',tier:1,cost:3,pre:['safety']},
+  {id:'scope',n:'示波器與光偵測',tier:1,cost:3,pre:['safety']},
+  {id:'cavity',n:'共振腔設計',tier:2,cost:4,pre:['gauss']},
+  {id:'thermal',n:'熱透鏡效應',tier:2,cost:4,pre:['cavity']},
+  {id:'qsw',n:'Q-switch 原理',tier:2,cost:4,pre:['rate','cavity']},
+  {id:'sa',n:'可飽和吸收體',tier:3,cost:5,pre:['qsw']},
+  {id:'mod',n:'聲光／電光調制',tier:3,cost:5,pre:['qsw','scope']},
+  {id:'srs',n:'受激拉曼散射 SRS',tier:3,cost:5,pre:['nlo','four']},
+  {id:'pqs_build',n:'PQS 雷射實作',tier:4,cost:6,pre:['sa','align','measure','scope']},
+  {id:'aqs_build',n:'AQS 雷射實作',tier:4,cost:6,pre:['mod','align','measure']},
+  {id:'raman_build',n:'CW Raman 雷射實作',tier:4,cost:6,pre:['srs','cavity','thermal','align','measure']}
+];
+// 師父：sched 是一週作息（1=週一 … 5=週五），沒寫的日子不在實驗室；每天約有 20% 機率臨時不在
+let MASTERS=[
+  {id:'m1',n:'青冥師兄',school:'pqs',teach:['align','scope','qsw','sa','pqs_build'],sched:{1:'big',2:'lab',3:'big',4:'lab',5:'small'}},
+  {id:'m2',n:'紫霞師姐',school:'aqs',teach:['scope','rate','qsw','mod','aqs_build'],sched:{1:'small',2:'small',3:'lab',4:'small',5:'lab'}},
+  {id:'m3',n:'玄光師兄',school:'raman',teach:['align','cavity','thermal','srs','raman_build'],sched:{1:'lab',2:'big',3:'lab',4:'big',5:'big'}},
+  {id:'m4',n:'雲遊學長',school:null,ext:'友情實驗室',teach:['nlo','gauss','measure'],sched:{2:'friend',3:'friend',5:'friend'}},
+  {id:'m5',n:'藏經閣博後',school:null,teach:['geo','four','rate','gauss','cavity'],sched:{1:'small',3:'small',4:'friend'}}
+];
+let AWAY=['去開會了','回家了','在無塵室','去聽演講','在趕論文','去送樣品'];
+let EXAM={9:[3,4,5],17:[3,4,5]};        // 期中、期末考週的考試日
+let ADV_AFF=3;                           // 學派系秘傳以上需要的好感
+/* ===================================================== */
+
+const DAYS=['','週一','週二','週三','週四','週五'];
+const TIERS=['基礎','心法','共通','派系秘傳','實作'];
+let SK,MS;
+function closure(id,set=new Set()){if(set.has(id))return set;set.add(id);SK[id].pre.forEach(p=>closure(p,set));return set;}
+function rebuild(){SK=Object.fromEntries(SKILLS.map(s=>[s.id,s]));MS=Object.fromEntries(MASTERS.map(m=>[m.id,m]));
+  for(const k in SCHOOLS)SCHOOLS[k].need=closure(SCHOOLS[k].final);
+  SKILLS.forEach(s=>{s.schools=Object.keys(SCHOOLS).filter(k=>SCHOOLS[k].need.has(s.id));s.by=MASTERS.filter(m=>m.teach.includes(s.id));});}
+rebuild();
+/* ---- 內容匯出／匯入（存在 Firestore 的 config/content，只有登入者讀得到） ---- */
+function exportContent(){
+  const strip=o=>JSON.parse(JSON.stringify(o,(k,v)=>['need','schools','by'].includes(k)?undefined:v));
+  return {places:strip(PLACES),schools:strip(SCHOOLS),skills:strip(SKILLS),masters:strip(MASTERS),away:AWAY,exam:EXAM,advAff:ADV_AFF};}
+function checkContent(c){const e=[];
+  if(!c||typeof c!=='object')return['不是 JSON 物件'];
+  for(const k of['places','schools','skills','masters'])if(!c[k])e.push('缺少 '+k);
+  if(e.length)return e;
+  const ids=new Set(c.skills.map(s=>s.id));
+  c.skills.forEach(s=>(s.pre||[]).forEach(p=>{if(!ids.has(p))e.push(`功法 ${s.id} 的前置 ${p} 不存在`);}));
+  for(const k in c.schools)if(!ids.has(c.schools[k].final))e.push(`派系 ${k} 的 final ${c.schools[k].final} 不存在`);
+  c.masters.forEach(m=>{(m.teach||[]).forEach(t=>{if(!ids.has(t))e.push(`師父 ${m.n} 教的 ${t} 不存在`);});
+    for(const d in (m.sched||{}))if(!c.places[m.sched[d]])e.push(`師父 ${m.n} 週${d} 的地點 ${m.sched[d]} 不存在`);
+    if(m.school&&!c.schools[m.school])e.push(`師父 ${m.n} 的派系 ${m.school} 不存在`);});
+  if(!e.length){const seen=new Set(),stack=new Set();const byId=Object.fromEntries(c.skills.map(s=>[s.id,s]));
+    const dfs=id=>{if(stack.has(id))return e.push('功法前置形成循環：'+id);if(seen.has(id))return;stack.add(id);(byId[id].pre||[]).forEach(dfs);stack.delete(id);seen.add(id);};
+    c.skills.forEach(s=>dfs(s.id));}
+  return e;}
+function applyContent(c){PLACES=c.places;SCHOOLS=c.schools;SKILLS=c.skills.map(s=>({pre:[],...s}));MASTERS=c.masters.map(m=>({sched:{},teach:[],...m}));
+  if(c.away)AWAY=c.away;if(c.exam)EXAM=c.exam;if(c.advAff!=null)ADV_AFF=c.advAff;rebuild();}
+
+let S,view='act',filter='all';
+let REF=null,ADMIN=false,PLAYERS=[],ME_NAME='',CONTENT_AT='';
+const fresh=()=>({school:null,week:1,day:1,prog:{},learned:{safety:true},aff:{},res:0,resSince:0,learnSince:0,meetings:[],log:[],place:null,ended:false});
+let saving=false,dirty=false;
+async function save(){if(!REF)return;dirty=true;if(saving)return;saving=true;
+  while(dirty){dirty=false;try{await REF.set(JSON.parse(JSON.stringify({...S,name:ME_NAME,updatedAt:new Date().toISOString()})));$('savest').textContent='已存檔';}
+    catch(e){$('savest').textContent='存檔失敗，請重新整理後再試';}}
+  saving=false;}
+const $=id=>document.getElementById(id);
+function h(tag,attrs,...kids){const e=document.createElement(tag);for(const k in attrs||{}){if(k==='class')e.className=attrs[k];else if(k.startsWith('on'))e[k]=attrs[k];else if(k==='html')e.innerHTML=attrs[k];else e.setAttribute(k,attrs[k]);}
+  kids.flat().forEach(c=>{if(c!=null&&c!==false)e.append(c.nodeType?c:document.createTextNode(c));});return e;}
+function hash(a,b){let x=0;const s=a+'|'+b;for(let i=0;i<s.length;i++)x=(x*31+s.charCodeAt(i))|0;x^=x>>>15;x=Math.imul(x,2246822507);x^=x>>>13;return((x>>>0)%1000)/1000;}
+function whereIs(m,w=S.week,d=S.day){const loc=m.sched[d];if(!loc)return{loc:null};const r=hash(w*10+d,m.id);
+  if(r<.2)return{loc:null,expected:loc,why:AWAY[Math.floor(r*100)%AWAY.length]};return{loc};}
+const aff=id=>S.aff[id]||0;
+const learned=id=>!!S.learned[id];
+const preOK=s=>s.pre.every(learned);
+function canTeach(m,s){if(learned(s.id))return'已習得';if(!preOK(s))return'需先學：'+s.pre.filter(p=>!learned(p)).map(p=>SK[p].n).join('、');
+  if(s.tier>=3&&aff(m.id)<ADV_AFF)return`好感需達 ${ADV_AFF}（目前 ${aff(m.id)}）`;return'';}
+const selfOK=s=>!learned(s.id)&&preOK(s)&&(s.book||(S.prog[s.id]||0)>0);
+const schoolTag=k=>h('span',{class:'tag '+k},SCHOOLS[k].en);
+function masterTag(m){return m.school?schoolTag(m.school):h('span',{class:'tag ext'},m.ext||'通才');}
+function log(html){S.log.unshift({t:`W${S.week} ${DAYS[S.day]}`,h:html});S.log=S.log.slice(0,80);}
+const nextMeetWeek=()=>{let w=S.week%2===0?S.week:S.week+1;if(w>=18)return null;return w;};
+
+function addProg(id,n){const s=SK[id];S.prog[id]=Math.min(s.cost,(S.prog[id]||0)+n);
+  if(S.prog[id]>=s.cost&&!learned(id)){S.learned[id]=true;S.learnSince++;log(`<b>習得〈${s.n}〉！</b>`);
+    if(S.school&&id===SCHOOLS[S.school].final)log(`<b>練成本派實作，可以獨立上桌了。</b>`);}}
+
+function doAct(kind,a){
+  const place=PLACES[S.place].n;
+  if(kind==='teach'){const m=MS[a.m],s=SK[a.s];const g=aff(m.id)>=5?3:2;addProg(s.id,g);S.aff[m.id]=Math.min(10,aff(m.id)+1);
+    if(!learned(s.id))log(`在${place}向${m.n}請教〈${s.n}〉，進度 ${S.prog[s.id]}/${s.cost}。`);}
+  else if(kind==='chat'){const m=MS[a.m];S.aff[m.id]=Math.min(10,aff(m.id)+1);log(`在${place}和${m.n}聊了一下午，好感 +1。`);}
+  else if(kind==='help'){const m=MS[a.m];S.aff[m.id]=Math.min(10,aff(m.id)+2);const same=m.school===S.school;if(same){S.res++;S.resSince++;}
+    log(`協助${m.n}做實驗，好感 +2${same?'，也累積了本派的實驗成果':''}。`);}
+  else if(kind==='study'){const s=SK[a.s];const g=S.place==='desk'?2:1;addProg(s.id,g);if(!learned(s.id))log(`自修〈${s.n}〉，進度 ${S.prog[s.id]}/${s.cost}。`);}
+  else if(kind==='exp'){const fin=learned(SCHOOLS[S.school].final);const g=fin?3:1;S.res+=g;S.resSince+=g;log(fin?`獨立完成一組量測，成果 +3。`:`在桌上練習架光路，成果 +1。`);}
+  else if(kind==='idle'){log(`在${place}等了一整天，沒遇到要找的人。`);}
+  endDay();
+}
+
+function endDay(){
+  S.place=null;
+  if(S.week===18&&S.day===5){S.ended=true;save();render();return ending();}
+  let meet=S.week%2===0&&S.day===5;
+  const go=()=>{advance();save();render();};
+  if(meet)meeting(go);else go();
+}
+function advance(){
+  for(;;){S.day++;if(S.day>5){S.day=1;S.week++;if(S.week===9)log('<b>期中考週</b>：週三到週五要考試。');if(S.week===17)log('<b>期末考週</b>：週三到週五要考試。');if(S.week===18)log('<b>第 18 週</b>：週五是期末成果發表。');}
+    if(EXAM[S.week]&&EXAM[S.week].includes(S.day)){log(`考試中，沒有進實驗室。`);continue;}break;}
+}
+function overlay(build){const ov=h('div',{class:'ov'});const b=h('div',{class:'ovb'});ov.append(b);document.body.append(ov);build(b,()=>ov.remove());const f=b.querySelector('button');if(f)f.focus();}
+function meeting(done){
+  const score=S.resSince+S.learnSince*2;
+  const [t,msg]=score>=7?['老師點頭稱許','進度很好。老師要你下次把量測條件整理成表格，順便帶學弟妹看一次。']:
+    score>=3?['老師給了幾個建議','有進度，但老師提醒你：新學的東西要實際用在實驗上，數據才有說服力。']:
+    ['老師沉默了一下','「這兩週在做什麼？」記得多去找師父請教，或上桌做點實驗。'];
+  S.meetings.push(score);log(`<b>組會</b>：${t}（學會 ${S.learnSince} 門功法、成果 ${S.resSince}）。`);
+  S.resSince=0;S.learnSince=0;
+  overlay((b,close)=>{b.append(h('h1',{},'宗門大會（組會）'),h('p',{class:'muted',style:'text-align:center'},`第 ${S.week} 週 · 週五`),h('h2',{style:'text-align:center'},t),h('p',{},msg),
+    h('button',{class:'btn',style:'align-self:center',onclick:()=>{close();done();}},'散會'));});
+}
+function ending(){
+  const sc=SCHOOLS[S.school];const need=[...sc.need];const got=need.filter(learned).length;const fin=learned(sc.final);
+  const avg=S.meetings.length?S.meetings.reduce((a,b)=>a+b,0)/S.meetings.length:0;
+  const title=fin&&S.res>=10?'出師':fin?'可以上桌了':got/need.length>=.6?'登堂入室':'仍在山門';
+  const best=MASTERS.slice().sort((a,b)=>aff(b.id)-aff(a.id))[0];
+  overlay((b,close)=>{b.append(h('h1',{},`期末評定：${title}`),
+    h('div',{class:'sum'},h('div',{},h('b',{},`${got}/${need.length}`),h('span',{},`${sc.en} 功法`)),h('div',{},h('b',{},S.res),h('span',{},'實驗成果')),h('div',{},h('b',{},avg.toFixed(1)),h('span',{},'組會平均'))),
+    h('p',{},fin?`你練成了〈${SK[sc.final].n}〉。下學期就輪到你當師父，在休息室等學弟妹來請教了。`:`本派還有 ${need.length-got} 門功法沒練成。到「功法圖譜」看看卡在哪個前置知識，下學期再找對的師父。`),
+    best&&aff(best.id)?h('p',{class:'muted'},`這學期和你最熟的是${best.n}（好感 ${aff(best.id)}）。`):null,
+    h('button',{class:'btn',style:'align-self:center',onclick:()=>{close();S=fresh();save();start();}},'再修一學期'));});
+}
+
+function start(){
+  if(!S.log.length)log('踏入五三三光學宗山門。第一週參加安全講習，習得〈雷射安全〉。');
+  render();
+  if(S.school)return;
+  overlay((b,close)=>{
+    b.append(h('h1',{},'拜入哪一派？'),h('p',{class:'muted'},'老師依實驗桌分派系。每一派要練成的功法不同，但有不少前置知識是共通的。'));
+    const p=h('div',{class:'pick'});
+    for(const k in SCHOOLS){const sc=SCHOOLS[k];const head=MASTERS.find(m=>m.school===k);
+      p.append(h('button',{onclick:()=>{S.school=k;log(`拜入<b>${sc.n}</b>，${head?head.n:''}是本派的師父。`);close();save();render();}},
+        h('b',{},`${sc.n}　${sc.en}`),h('span',{},sc.d),h('span',{},`出師需 ${sc.need.size} 門功法 · 本派師父：${head?head.n:'—'}`)));}
+    b.append(p);
+  });
+}
+
+/* ===================== render ===================== */
+function render(){
+  $('date').innerHTML=`第 ${S.week} 週 · ${DAYS[S.day]}<small>${S.week<9?'上半學期':S.week<17?'下半學期':'學期末'}${EXAM[S.week]?' · 考試週':''}</small>`;
+  const tl=$('tl');tl.innerHTML='';for(let w=1;w<=18;w++)tl.append(h('div',{class:(w<S.week?'past':w===S.week?'now':'')+([1,9,17,18].includes(w)?' ev':''),title:`第 ${w} 週`}));
+  const wk=$('week');wk.innerHTML='';for(let d=1;d<=5;d++){const ex=EXAM[S.week]&&EXAM[S.week].includes(d);const mt=S.week%2===0&&d===5;
+    wk.append(h('div',{class:d<S.day?'past':d===S.day?'now':''},h('b',{},DAYS[d]),ex?h('i',{},'考試'):S.week===18&&d===5?h('i',{},'成果發表'):mt?h('i',{},'組會'):' '));}
+  if(S.school){const sc=SCHOOLS[S.school];const need=[...sc.need];const got=need.filter(learned).length;
+    $('s-school').textContent=sc.n;$('s-path').textContent=`${got} / ${need.length}`;$('s-pathbar').style.width=got/need.length*100+'%';}
+  $('s-res').textContent=S.res;const nm=nextMeetWeek();$('s-meet').textContent=S.week===18?'期末發表':nm?`第 ${nm} 週五`:'—';
+  document.querySelectorAll('.tabs button').forEach(b=>b.setAttribute('aria-selected',b.dataset.v===view));
+  const v=$('view');v.innerHTML='';v.append(view==='act'?renderAct():view==='tree'?renderTree():view==='admin'?renderAdmin():renderMasters());
+}
+function renderLog(){const ul=h('ul',{class:'log'});S.log.forEach(l=>ul.append(h('li',{html:`<time>${l.t}</time>${l.h}`})));return h('section',{class:'box'},h('h2',{},'修仙日誌'),ul);}
+function renderAct(){
+  const wrap=h('div',{class:'main'});const left=h('div',{class:'col'});
+  if(S.ended){left.append(h('section',{class:'box'},h('h2',{},'學期結束'),h('button',{class:'btn',onclick:ending},'查看期末評定')));}
+  else if(!S.place){
+    const box=h('section',{class:'box'},h('h2',{},'今天要去哪裡？',h('em',{},'一天只能去一個地方')));
+    const g=h('div',{class:'places'});
+    for(const k in PLACES){const hint=MASTERS.filter(m=>m.sched[S.day]===k).map(m=>m.n);
+      g.append(h('button',{class:'place',onclick:()=>{S.place=k;save();render();}},h('b',{},PLACES[k].n),h('span',{},PLACES[k].d),
+        k==='desk'?h('span',{class:'who'},'可自修有書可讀的功法（進度 +2）'):h('span',{class:'who'},hint.length?`${DAYS[S.day]}常在這裡：${hint.join('、')}`:`${DAYS[S.day]}通常沒有師父在這`)));}
+    box.append(g,h('p',{class:'muted'},'提示：作息只是「通常」，師父偶爾會臨時不在。可到「師父名錄」查每個人的一週作息，到「功法圖譜」查功法該找誰學。'));
+    left.append(box);
+  } else left.append(renderPlace());
+  wrap.append(left,h('div',{class:'col'},renderLog()));return wrap;
+}
+function renderPlace(){
+  const k=S.place,P=PLACES[k];const box=h('section',{class:'box'},h('h2',{},P.n,h('em',{},`第 ${S.week} 週 · ${DAYS[S.day]}`)));
+  let any=false;
+  if(k!=='desk'){
+    const here=[],away=[];MASTERS.forEach(m=>{const w=whereIs(m);if(w.loc===k)here.push(m);else if(w.expected===k)away.push([m,w.why]);});
+    away.forEach(([m,why])=>box.append(h('p',{class:'away'},`${m.n}今天不在，聽說${why}。`)));
+    if(!here.length&&!away.length)box.append(h('p',{class:'muted'},'今天這裡沒有師父。'));
+    here.forEach(m=>{
+      const c=h('div',{class:'mcard'},h('div',{class:'mhead'},h('b',{},m.n),h('span',{},masterTag(m),' ',h('span',{class:'tag'},`好感 ${aff(m.id)}`))));
+      const acts=h('div',{class:'acts'});const locks=[];
+      m.teach.forEach(id=>{const s=SK[id];const why=canTeach(m,s);
+        if(!why){any=true;acts.append(h('button',{class:'act',onclick:()=>doAct('teach',{m:m.id,s:id})},`請教〈${s.n}〉`,h('small',{},`${S.prog[id]||0}/${s.cost} · +${aff(m.id)>=5?3:2}`)));}
+        else if(why!=='已習得')locks.push(`〈${s.n}〉${why}`);});
+      if(k==='lab'){any=true;acts.append(h('button',{class:'act',onclick:()=>doAct('help',{m:m.id})},'協助實驗',h('small',{},m.school===S.school?'好感 +2 · 成果 +1':'好感 +2')));}
+      else{any=true;acts.append(h('button',{class:'act',onclick:()=>doAct('chat',{m:m.id})},'閒聊',h('small',{},'好感 +1')));}
+      c.append(acts);if(locks.length)c.append(h('div',{class:'lock'},'還不能學：'+locks.join('；')));box.append(c);
+    });
+  }
+  if(k==='lab'){const ok=learned('align');box.append(h('div',{class:'acts'},h('button',{class:'act',disabled:ok?null:'',onclick:()=>doAct('exp')},'自己上桌做實驗',h('small',{},ok?(learned(SCHOOLS[S.school].final)?'成果 +3':'成果 +1'):'需先學〈光路準直〉'))));if(ok)any=true;}
+  const self=SKILLS.filter(selfOK);
+  if(k!=='lab'&&self.length){const g=k==='desk'?2:1;box.append(h('h3',{style:'font-size:1rem;color:var(--dim)'},k==='desk'?'自修':'在這裡讀點書'));
+    const a=h('div',{class:'acts'});self.forEach(s=>a.append(h('button',{class:'act',onclick:()=>doAct('study',{s:s.id})},`〈${s.n}〉`,h('small',{},`${S.prog[s.id]||0}/${s.cost} · +${g}`))));box.append(a);any=true;}
+  if(k==='desk'&&!self.length)box.append(h('p',{class:'muted'},'目前沒有可以自修的功法。有書可讀的基礎功法，或已經請教過、入門的功法，才能自修。'));
+  if(!any)box.append(h('button',{class:'act',onclick:()=>doAct('idle')},'今天就這樣吧',h('small',{},'結束這一天')));
+  return box;
+}
+function renderTree(){
+  const box=h('section',{class:'box'},h('h2',{},'功法圖譜',h('em',{},'金框：現在就能學 · 綠框：已習得')));
+  const f=h('div',{class:'filters'});[['all','全部'],...Object.keys(SCHOOLS).map(k=>[k,SCHOOLS[k].en])].forEach(([k,n])=>f.append(h('button',{'aria-pressed':String(filter===k),onclick:()=>{filter=k;render();}},n)));
+  box.append(f,h('p',{class:'muted'},'金色「共通」代表兩個以上派系都要學。點派系可以只看那一派的出師路線。'));
+  const tree=h('div',{class:'tree'});
+  [[0],[1],[2],[3,4]].forEach((ts,i)=>{const col=h('div',{class:'tier'},h('h3',{},['基礎','心法','共通進階','秘傳與實作'][i]));
+    SKILLS.filter(s=>ts.includes(s.tier)).forEach(s=>{
+      const done=learned(s.id),open=!done&&preOK(s);const dim=filter!=='all'&&!SCHOOLS[filter].need.has(s.id);
+      const tags=h('div',{class:'tags'},s.schools.length>1?h('span',{class:'tag share'},'共通'):null,...s.schools.map(schoolTag));
+      col.append(h('div',{class:'node'+(done?' done':open?' open':'')+(dim?' dim':'')},
+        h('b',{},s.n),
+        h('span',{class:'st '+(done?'done':open?'open':'lockd')},done?'已習得':open?`可修習 · ${S.prog[s.id]||0}/${s.cost}`:'尚未解鎖'),
+        s.pre.length?h('span',{class:'pr'},'前置：'+s.pre.map(p=>SK[p].n).join('、')):null,
+        h('span',{class:'pr'},s.auto?s.d:'傳授：'+(s.by.map(m=>m.n).join('、')||'—')+(s.book?'（可自修）':'')),
+        tags));});
+    tree.append(col);});
+  box.append(h('div',{style:'overflow-x:auto'},tree));return box;
+}
+function renderMasters(){
+  const box=h('section',{class:'box'},h('h2',{},'師父名錄',h('em',{},'金框是今天')));
+  const g=h('div',{class:'masters'});
+  MASTERS.forEach(m=>{const sch=h('div',{class:'sched'});for(let d=1;d<=5;d++){const l=m.sched[d];sch.append(h('div',{class:d===S.day?'today':''},h('b',{},DAYS[d]),l?PLACES[l].n.replace('休息室','').replace('實驗室','實驗室'):'不在'));}
+    g.append(h('div',{class:'mcard'},h('div',{class:'mhead'},h('b',{},m.n),masterTag(m)),
+      h('div',{class:'aff'},'好感',h('div',{class:'bar'},h('div',{style:`width:${aff(m.id)*10}%`})),String(aff(m.id))),
+      sch,h('div',{class:'teach'},'傳授：'+m.teach.map(id=>SK[id].n+(learned(id)?' ✓':'')).join('、'))));});
+  box.append(g,h('p',{class:'muted'},`派系秘傳與實作要好感 ${ADV_AFF} 以上才肯教。請教、閒聊、協助實驗都能增加好感；好感 5 以上，每次請教進度 +3。`));return box;
+}
+
+function renderAdmin(){
+  const box=h('section',{class:'box'},h('h2',{},'弟子總覽',h('em',{},'只有管理者看得到')));
+  const out=h('div',{class:'col'},box,renderContentBox());
+  if(!PLAYERS.length){box.append(h('p',{class:'muted'},'還沒有人開始玩。在 Firebase 幫學弟妹建立帳號，他們登入後就會出現在這裡。'));return out;}
+  const t=h('table',{class:'ptable'},h('thead',{},h('tr',{},...['弟子','派系','進度','出師','成果','組會平均','最後遊玩'].map(x=>h('th',{},x)))));
+  const tb=h('tbody');
+  PLAYERS.slice().sort((a,b)=>String(b.d.updatedAt||'').localeCompare(String(a.d.updatedAt||''))).forEach(({id,d})=>{
+    const sc=d.school&&SCHOOLS[d.school];const L=d.learned||{};const need=sc?[...sc.need]:[];const got=need.filter(x=>L[x]).length;
+    const m=d.meetings||[];const avg=m.length?(m.reduce((a,b)=>a+b,0)/m.length).toFixed(1):'—';
+    const nm=d.nick?`${d.nick}（${d.name||'?'}）`:(d.name||'（未知）');
+    tb.append(h('tr',{},h('td',{},nm),h('td',{},sc?sc.en:'未入門'),h('td',{},d.ended?'學期結束':`W${d.week} ${DAYS[d.day]||''}`),h('td',{},sc?`${got}/${need.length}`:'—'),
+      h('td',{},String(d.res||0)),h('td',{},avg),h('td',{},d.updatedAt?new Date(d.updatedAt).toLocaleString('zh-TW',{month:'numeric',day:'numeric',hour:'2-digit',minute:'2-digit'}):'—')));});
+  t.append(tb);box.append(h('div',{style:'overflow-x:auto'},t));return out;
+}
+function renderContentBox(){
+  const msg=h('p',{class:'muted'});
+  const file=h('input',{type:'file',accept:'.json,application/json',id:'cfile'});
+  file.onchange=()=>{const f=file.files[0];if(!f)return;const r=new FileReader();
+    r.onload=async()=>{let c;try{c=JSON.parse(r.result);}catch(e){msg.textContent='檔案不是有效的 JSON。';return;}
+      const errs=checkContent(c);if(errs.length){msg.textContent='內容有問題：'+errs.slice(0,5).join('；');return;}
+      msg.textContent='上傳中…';
+      try{CONTENT_AT=new Date().toISOString();await firebase.firestore().collection('config').doc('content').set({json:JSON.stringify(c),updatedAt:CONTENT_AT});
+        applyContent(c);render();}catch(e){msg.textContent='上傳失敗：'+(e.code||e.message);}};
+    r.readAsText(f);file.value='';};
+  const dl=()=>{const b=new Blob([JSON.stringify(exportContent(),null,2)],{type:'application/json'});const a=document.createElement('a');a.href=URL.createObjectURL(b);a.download='content.json';a.click();setTimeout(()=>URL.revokeObjectURL(a.href),1000);};
+  return h('section',{class:'box'},h('h2',{},'遊戲內容',h('em',{},CONTENT_AT?`已上傳自訂內容（${new Date(CONTENT_AT).toLocaleString('zh-TW')}）`:'目前是預設範例')),
+    h('p',{class:'muted'},'師父、派系、功法、作息都在內容檔裡。先下載目前內容、修改後再上傳。內容存在資料庫，只有登入的人讀得到，不會出現在公開的網頁原始碼裡。'),
+    h('div',{class:'row'},h('button',{class:'btn',onclick:dl},'下載目前內容'),h('label',{class:'btn',for:'cfile'},'上傳內容檔',file)),msg);
+}
+document.querySelectorAll('.tabs button').forEach(b=>b.onclick=()=>{view=b.dataset.v;render();});
+let armed=false;
+$('reset').onclick=e=>{if(!armed){armed=true;e.target.textContent='再按一次確認重來';setTimeout(()=>{armed=false;e.target.textContent='重新開始';},3000);return;}
+  armed=false;e.target.textContent='重新開始';S=fresh();save();start();};
+
+(()=>{const c=$('stars'),x=c.getContext('2d');let st=[];const rm=matchMedia('(prefers-reduced-motion: reduce)').matches;
+  const size=()=>{c.width=innerWidth*devicePixelRatio;c.height=innerHeight*devicePixelRatio;st=Array.from({length:80},()=>({x:Math.random()*c.width,y:Math.random()*c.height,r:Math.random()*1.3*devicePixelRatio+.3,p:Math.random()*6}));};
+  size();addEventListener('resize',size);
+  const f=t=>{x.clearRect(0,0,c.width,c.height);st.forEach(s=>{x.globalAlpha=.2+.3*(1+Math.sin(t/1600+s.p))/2;x.fillStyle='#e9dfc3';x.beginPath();x.arc(s.x,s.y,s.r,0,7);x.fill();});if(!rm)requestAnimationFrame(f);};
+  requestAnimationFrame(f);})();
+
+function showMe(){$('me').textContent='弟子：'+(S&&S.nick||ME_NAME);}
+function gate(t,d,form){$('gate').hidden=false;$('app').hidden=true;$('gate-t').textContent=t;$('gate-d').textContent=d;$('login').hidden=!form;}
+const CFG=window.FIREBASE_CONFIG||{};
+const DOMAIN=window.LOGIN_DOMAIN||'lab533.example.com';
+const toEmail=u=>(u=u.trim(),u.includes('@')?u:u.toLowerCase()+'@'+DOMAIN);
+const ERR={'auth/invalid-credential':'帳號或密碼不正確。','auth/wrong-password':'帳號或密碼不正確。','auth/user-not-found':'帳號或密碼不正確。',
+  'auth/invalid-email':'帳號格式不正確。','auth/too-many-requests':'嘗試太多次，請稍後再試。','auth/network-request-failed':'網路連線失敗，請檢查網路。',
+  'auth/user-disabled':'這個帳號已被停用，請找管理者。','auth/weak-password':'密碼至少要 6 個字元。','auth/requires-recent-login':'為了安全，請先登出再登入一次，然後馬上改密碼。'};
+const DEFAULT_CONTENT=exportContent();
+if(!window.firebase||!CFG.apiKey||String(CFG.apiKey).startsWith('請')){gate('尚未完成設定','管理者還沒填好 firebase-config.js，請參考 README 的設定步驟。',false);}
+else{
+  firebase.initializeApp(CFG);const AUTH=firebase.auth(),FS=firebase.firestore();let UNSUB=null;
+  $('login').onsubmit=async e=>{e.preventDefault();$('lg-err').textContent='';$('lg-btn').disabled=true;
+    try{await AUTH.signInWithEmailAndPassword(toEmail($('lg-user').value),$('lg-pass').value);$('lg-pass').value='';}
+    catch(err){$('lg-err').textContent=ERR[err.code]||('登入失敗（'+err.code+'）');}
+    $('lg-btn').disabled=false;};
+  $('logout').onclick=()=>AUTH.signOut();
+  $('nick').onclick=()=>overlay((b,close)=>{
+    const inp=h('input',{id:'nk',maxlength:'16',value:S.nick||ME_NAME}),er=h('p',{class:'err'});
+    const f=h('form',{class:'login',style:'max-width:none'},h('label',{for:'nk'},'遊戲中顯示的名稱（道號），最多 16 字',inp),er,
+      h('div',{class:'row'},h('button',{class:'btn',type:'submit'},'儲存'),h('button',{class:'link',type:'button',onclick:close},'取消')));
+    f.onsubmit=async e=>{e.preventDefault();const v=inp.value.trim();if(!v){er.textContent='名稱不能空白。';return;}
+      S.nick=v===ME_NAME?'':v;showMe();await save();close();};
+    b.append(h('h1',{},'更改名稱'),h('p',{class:'muted'},`登入帳號仍是「${ME_NAME}」，這裡只改遊戲裡顯示的名字。`),f);});
+  $('pw').onclick=()=>overlay((b,close)=>{
+    const p1=h('input',{type:'password',id:'pw1',autocomplete:'new-password'}),p2=h('input',{type:'password',id:'pw2',autocomplete:'new-password'}),er=h('p',{class:'err'});
+    const f=h('form',{class:'login',style:'max-width:none'},h('label',{for:'pw1'},'新密碼（至少 6 個字元）',p1),h('label',{for:'pw2'},'再輸入一次',p2),er,
+      h('div',{class:'row'},h('button',{class:'btn',type:'submit'},'更改密碼'),h('button',{class:'link',type:'button',onclick:close},'取消')));
+    f.onsubmit=async e=>{e.preventDefault();if(p1.value!==p2.value){er.textContent='兩次輸入的密碼不一樣。';return;}
+      try{await AUTH.currentUser.updatePassword(p1.value);b.replaceChildren(h('h1',{},'密碼已更改'),h('button',{class:'btn',style:'align-self:center',onclick:close},'好'));}
+      catch(err){er.textContent=ERR[err.code]||('更改失敗（'+err.code+'）');}};
+    b.append(h('h1',{},'更改密碼'),f);});
+  AUTH.onAuthStateChanged(async u=>{
+    if(UNSUB){UNSUB();UNSUB=null;}
+    document.querySelectorAll('.ov').forEach(o=>o.remove());
+    if(!u){REF=null;ADMIN=false;PLAYERS=[];$('tab-admin').hidden=true;view='act';gate('光道修仙錄','請用管理者給你的帳號密碼登入。',true);return;}
+    gate('光道修仙錄','正在讀取修煉進度…',false);
+    ME_NAME=(u.email||'').split('@')[0];
+    applyContent(DEFAULT_CONTENT);CONTENT_AT='';
+    try{const cs=await FS.collection('config').doc('content').get();
+      if(cs.exists&&cs.data().json){const c=JSON.parse(cs.data().json);if(!checkContent(c).length){applyContent(c);CONTENT_AT=cs.data().updatedAt||'';}}}catch(e){}
+    REF=FS.collection('players').doc(u.uid);
+    try{const snap=await REF.get();S=snap.exists?Object.assign(fresh(),snap.data()):fresh();}
+    catch(e){return gate('讀取失敗','無法讀取存檔（'+(e.code||e.message)+'）。請重新整理，或請管理者確認 Firestore 規則。',false);}
+    delete S.updatedAt;delete S.name;
+    for(const id in S.learned)if(!SK[id])delete S.learned[id];
+    if(S.school&&!SCHOOLS[S.school])S.school=null;
+    showMe();
+    try{ADMIN=(await FS.collection('admins').doc(u.uid).get()).exists;}catch(e){ADMIN=false;}
+    $('tab-admin').hidden=!ADMIN;
+    if(ADMIN)UNSUB=FS.collection('players').onSnapshot(q=>{PLAYERS=q.docs.map(x=>({id:x.id,d:x.data()}));if(view==='admin')render();},()=>{});
+    $('gate').hidden=true;$('app').hidden=false;
+    start();if(S.ended)ending();
+  });
+}
+</script>
+</body>
+</html>

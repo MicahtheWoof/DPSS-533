@@ -1,0 +1,331 @@
+{
+  "places": {
+    "big": {
+      "n": "大間休息室",
+      "d": "人最多，午餐時間特別熱鬧。"
+    },
+    "small": {
+      "n": "小間休息室",
+      "d": "比較安靜，常有人在讀 paper、推公式。"
+    },
+    "friend": {
+      "n": "友情實驗室",
+      "d": "隔壁友好的實驗室，有我們沒有的專長。"
+    },
+    "lab": {
+      "n": "實驗區",
+      "d": "各派系的光學桌。可協助師父做實驗，或自己動手。"
+    },
+    "desk": {
+      "n": "自己的座位",
+      "d": "安靜讀書、看課本與 paper。"
+    }
+  },
+  "schools": {
+    "pqs": {
+      "n": "被動調Q派",
+      "en": "PQS",
+      "d": "以可飽和吸收體控制共振腔 Q 值，產生奈秒脈衝。",
+      "final": "pqs_build"
+    },
+    "aqs": {
+      "n": "主動調Q派",
+      "en": "AQS",
+      "d": "以聲光或電光調制器主動開關共振腔。",
+      "final": "aqs_build"
+    },
+    "raman": {
+      "n": "連續拉曼派",
+      "en": "CW Raman",
+      "d": "利用受激拉曼散射，把雷射轉換到新的波長。",
+      "final": "raman_build"
+    }
+  },
+  "skills": [
+    {
+      "id": "safety",
+      "n": "雷射安全",
+      "tier": 0,
+      "cost": 0,
+      "pre": [],
+      "auto": true,
+      "d": "第一週安全講習自動習得。"
+    },
+    {
+      "id": "geo",
+      "n": "幾何光學",
+      "tier": 0,
+      "cost": 3,
+      "pre": [],
+      "book": true
+    },
+    {
+      "id": "four",
+      "n": "四能階系統",
+      "tier": 0,
+      "cost": 3,
+      "pre": [],
+      "book": true
+    },
+    {
+      "id": "nlo",
+      "n": "非線性光學基礎",
+      "tier": 0,
+      "cost": 4,
+      "pre": [],
+      "book": true
+    },
+    {
+      "id": "gauss",
+      "n": "高斯光束",
+      "tier": 1,
+      "cost": 3,
+      "pre": [
+        "geo"
+      ],
+      "book": true
+    },
+    {
+      "id": "rate",
+      "n": "速率方程",
+      "tier": 1,
+      "cost": 4,
+      "pre": [
+        "four"
+      ]
+    },
+    {
+      "id": "align",
+      "n": "光路準直",
+      "tier": 1,
+      "cost": 3,
+      "pre": [
+        "safety"
+      ]
+    },
+    {
+      "id": "measure",
+      "n": "功率與光譜量測",
+      "tier": 1,
+      "cost": 3,
+      "pre": [
+        "safety"
+      ]
+    },
+    {
+      "id": "scope",
+      "n": "示波器與光偵測",
+      "tier": 1,
+      "cost": 3,
+      "pre": [
+        "safety"
+      ]
+    },
+    {
+      "id": "cavity",
+      "n": "共振腔設計",
+      "tier": 2,
+      "cost": 4,
+      "pre": [
+        "gauss"
+      ]
+    },
+    {
+      "id": "thermal",
+      "n": "熱透鏡效應",
+      "tier": 2,
+      "cost": 4,
+      "pre": [
+        "cavity"
+      ]
+    },
+    {
+      "id": "qsw",
+      "n": "Q-switch 原理",
+      "tier": 2,
+      "cost": 4,
+      "pre": [
+        "rate",
+        "cavity"
+      ]
+    },
+    {
+      "id": "sa",
+      "n": "可飽和吸收體",
+      "tier": 3,
+      "cost": 5,
+      "pre": [
+        "qsw"
+      ]
+    },
+    {
+      "id": "mod",
+      "n": "聲光／電光調制",
+      "tier": 3,
+      "cost": 5,
+      "pre": [
+        "qsw",
+        "scope"
+      ]
+    },
+    {
+      "id": "srs",
+      "n": "受激拉曼散射 SRS",
+      "tier": 3,
+      "cost": 5,
+      "pre": [
+        "nlo",
+        "four"
+      ]
+    },
+    {
+      "id": "pqs_build",
+      "n": "PQS 雷射實作",
+      "tier": 4,
+      "cost": 6,
+      "pre": [
+        "sa",
+        "align",
+        "measure",
+        "scope"
+      ]
+    },
+    {
+      "id": "aqs_build",
+      "n": "AQS 雷射實作",
+      "tier": 4,
+      "cost": 6,
+      "pre": [
+        "mod",
+        "align",
+        "measure"
+      ]
+    },
+    {
+      "id": "raman_build",
+      "n": "CW Raman 雷射實作",
+      "tier": 4,
+      "cost": 6,
+      "pre": [
+        "srs",
+        "cavity",
+        "thermal",
+        "align",
+        "measure"
+      ]
+    }
+  ],
+  "masters": [
+    {
+      "id": "m1",
+      "n": "青冥師兄",
+      "school": "pqs",
+      "teach": [
+        "align",
+        "scope",
+        "qsw",
+        "sa",
+        "pqs_build"
+      ],
+      "sched": {
+        "1": "big",
+        "2": "lab",
+        "3": "big",
+        "4": "lab",
+        "5": "small"
+      }
+    },
+    {
+      "id": "m2",
+      "n": "紫霞師姐",
+      "school": "aqs",
+      "teach": [
+        "scope",
+        "rate",
+        "qsw",
+        "mod",
+        "aqs_build"
+      ],
+      "sched": {
+        "1": "small",
+        "2": "small",
+        "3": "lab",
+        "4": "small",
+        "5": "lab"
+      }
+    },
+    {
+      "id": "m3",
+      "n": "玄光師兄",
+      "school": "raman",
+      "teach": [
+        "align",
+        "cavity",
+        "thermal",
+        "srs",
+        "raman_build"
+      ],
+      "sched": {
+        "1": "lab",
+        "2": "big",
+        "3": "lab",
+        "4": "big",
+        "5": "big"
+      }
+    },
+    {
+      "id": "m4",
+      "n": "雲遊學長",
+      "school": null,
+      "ext": "友情實驗室",
+      "teach": [
+        "nlo",
+        "gauss",
+        "measure"
+      ],
+      "sched": {
+        "2": "friend",
+        "3": "friend",
+        "5": "friend"
+      }
+    },
+    {
+      "id": "m5",
+      "n": "藏經閣博後",
+      "school": null,
+      "teach": [
+        "geo",
+        "four",
+        "rate",
+        "gauss",
+        "cavity"
+      ],
+      "sched": {
+        "1": "small",
+        "3": "small",
+        "4": "friend"
+      }
+    }
+  ],
+  "away": [
+    "去開會了",
+    "回家了",
+    "在無塵室",
+    "去聽演講",
+    "在趕論文",
+    "去送樣品"
+  ],
+  "exam": {
+    "9": [
+      3,
+      4,
+      5
+    ],
+    "17": [
+      3,
+      4,
+      5
+    ]
+  },
+  "advAff": 3
+}
