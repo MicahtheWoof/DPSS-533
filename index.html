@@ -488,6 +488,7 @@ let PLACES={
   r526:{n:'526實驗室',d:'有光學桌的實驗室。',lab:true,art:'lab',num:'526',beam:'#4dff6a',floor:5,tables:[]},
   r527:{n:'527實驗室',d:'有光學桌的實驗室。',lab:true,art:'lab',num:'527',beam:'#ffd23f',floor:5,tables:[]},
   r327:{n:'327實驗室',d:'有光學桌的實驗室。',lab:true,art:'lab',num:'327',beam:'#ffd23f',floor:3,tables:[]},
+  r317:{n:'317會議室',d:'開 meeting 的地方。',art:'door',num:'317',floor:3},
   home:{n:'溫馨小家',d:'早點起床，每天都要動一動。',art:'home',study:true}
 };
 let SCHOOLS={
@@ -558,7 +559,10 @@ let SKILLS=[
   {id:'sesam_build',n:'mode locking-SESAM 實作',tier:4,pre:['sesamp','autocorr','align'],practice:true,reading:[{type:'internal',t:'學長姐相關碩論',note:'待補'}]},
   {id:'mlth_build',n:'mode locking-thermal 實作',tier:4,pre:['mlthp','autocorr','align'],practice:true,reading:[{type:'internal',t:'學長姐相關碩論',note:'待補'}]}
 ];
-
+// 範例師兄姐（之後可刪掉，改由大家在「人物」頁自己登記）：sched 行程（1=週一 … 5=週五）；spec 專長；contact 聯絡方式；prep 請教前準備；look 像素外觀
+// 預設的範例師兄姐已刪除；真正的師兄姐請大家自己在遊戲裡登記，或由管理者「預先登記」
+let MASTERS=[];
+/* ===================================================== */
 
 const DAYS=['週日','週一','週二','週三','週四','週五','週六'];
 const TIERS=['基礎','心法','共通進階','派系秘傳','實作'];
@@ -606,7 +610,7 @@ rebuild();
 /* ---- 內容匯出／匯入（存在 Firestore 的 config/content，只有登入的人讀得到） ---- */
 function exportContent(){
   const strip=o=>JSON.parse(JSON.stringify(o,(k,v)=>['need','schools','by','baseSet'].includes(k)?undefined:v));
-  return {rev:6,dims:DIMS,sects:SECTS,periods:PERIODS,semester:SEMESTER,ranks:RANKS,realms:REALMS,mind:MIND,books:BOOKS,places:strip(PLACES),schools:strip(SCHOOLS),skills:strip(SKILLS),masters:strip(MASTERS)};}
+  return {rev:7,dims:DIMS,sects:SECTS,periods:PERIODS,semester:SEMESTER,ranks:RANKS,realms:REALMS,mind:MIND,books:BOOKS,places:strip(PLACES),schools:strip(SCHOOLS),skills:strip(SKILLS),masters:strip(MASTERS)};}
 function checkContent(c){const e=[];
   if(!c||typeof c!=='object')return['不是 JSON 物件'];
   for(const k of['places','schools','skills','masters'])if(!c[k])e.push('缺少 '+k);
@@ -665,7 +669,11 @@ const SEATS_V5={"pqs":"lab:A","pqs2":"lab:B","aqs":"lab:D","cw":"lab:H","greens"
 function upgradeV5(c){if((c.rev||0)>=5)return c;const P=c.places||{};Object.entries(PLANS_V5).forEach(([k,v])=>{if(P[k]&&!P[k].plan)P[k].plan=JSON.parse(JSON.stringify(v));});
   if(P.friend)P.friend.lab=true;Object.entries(SEATS_V5).forEach(([k,v])=>{if(c.schools[k]&&!c.schools[k].seat)c.schools[k].seat=v;});c.rev=5;return c;}
 function upgradeV6(c){if((c.rev||0)>=6)return c;const P=c.places||{};['lab','r526'].forEach(k=>{if(P[k])P[k].plan=JSON.parse(JSON.stringify(PLANS_V5[k]));});c.rev=6;return c;}
-function upgradeContent(c){upgradeV2(c);upgradeV3(c);upgradeV4(c);upgradeV5(c);return upgradeV6(c);}
+const EXAMPLE_MASTERS=['m1','m2','m3','m4','m5'];
+function upgradeV7(c){if((c.rev||0)>=7)return c;c.masters=(c.masters||[]).filter(m=>!EXAMPLE_MASTERS.includes(m.id));
+  if(c.places&&!c.places.r317){const P={};Object.entries(c.places).forEach(([k,v])=>{P[k]=v;if(k==='r327')P.r317={n:'317會議室',d:'開 meeting 的地方。',art:'door',num:'317',floor:3};});if(!P.r317)P.r317={n:'317會議室',d:'開 meeting 的地方。',art:'door',num:'317',floor:3};c.places=P;}
+  c.rev=7;return c;}
+function upgradeContent(c){upgradeV2(c);upgradeV3(c);upgradeV4(c);upgradeV5(c);upgradeV6(c);return upgradeV7(c);}
 function upgradeV2(c){if((c.rev||0)>=2)return c;const by=Object.fromEntries(c.skills.map(s=>[s.id,s]));
   NEW_SKILLS_V2.forEach(n=>{if(!by[n.id]){const x={...n,pre:n.pre.filter(p=>by[p]||NEW_SKILLS_V2.some(q=>q.id===p)),reading:[]};c.skills.push(x);by[x.id]=x;}});
   const ren=(id,o)=>{if(by[id])Object.assign(by[id],o);};
@@ -1060,7 +1068,7 @@ function scene(k,people=[],big=false){
 /* ===================== 狀態 ===================== */
 let S,view='map',sel=null,back=null,skillMode='list',filter='all';
 let REF=null,ADMIN=false,PLAYERS=[],ROSTERS={},ROSTER={},ME_NAME='',CONTENT_AT='';
-const fresh=()=>({sect:null,school:null,schools:[],steps:{},look:{...DEFAULT_LOOK},log:[],nick:'',realmSeen:0,wkend:{},tags:[],pubWeekend:false,senior:false,pub:false,prof:{},sched:{"3":{"p9":"317"}}});
+const fresh=()=>({sect:null,school:null,schools:[],steps:{},look:{...DEFAULT_LOOK},log:[],nick:'',realmSeen:0,wkend:{},tags:[],pubWeekend:false,senior:false,pub:false,prof:{},sched:{}});
 const $=id=>document.getElementById(id);
 function h(tag,attrs,...kids){const e=document.createElement(tag);for(const k in attrs||{}){const v=attrs[k];if(v==null||v===false)continue;
     if(k==='class')e.className=v;else if(k.startsWith('on'))e[k]=v;else if(k==='html')e.innerHTML=v;else e.setAttribute(k,v);}
@@ -1535,7 +1543,7 @@ function readingList(s){const R=s.reading||[];
       x.url?h('a',{href:x.url,target:'_blank',rel:'noopener'},'開啟連結'):null))));}
 function whoTeaches(s){const T=teachersOf(s.id);if(!T.length)return h('p',{class:'muted'},'還沒有師兄姐登記會教這門。');
   return h('div',{class:'acts'},...T.map(m=>h('button',{class:'act',onclick:()=>go('master',m.id)},h('span',{class:'mname'},sprite(m.look,2),m.n,' ',personTag(m)),h('small',{},nowText(m)))));}
-const placeShort=k=>PLACES[k]?PLACES[k].n.replace('休息室','').replace('實驗室',''):'';
+const placeShort=k=>PLACES[k]?PLACES[k].n.replace('休息室','').replace('實驗室','').replace('會議室',''):'';
 function renderSkill(){
   const s=SK[sel];if(!s){view='skills';return renderSkills();}
   const x=st(s.id);const mine=pathOf(mySchools()).includes(s.id);
