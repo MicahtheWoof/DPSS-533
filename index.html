@@ -1060,7 +1060,7 @@ function scene(k,people=[],big=false){
 /* ===================== 狀態 ===================== */
 let S,view='map',sel=null,back=null,skillMode='list',filter='all';
 let REF=null,ADMIN=false,PLAYERS=[],ROSTERS={},ROSTER={},ME_NAME='',CONTENT_AT='';
-const fresh=()=>({sect:null,school:null,schools:[],steps:{},look:{...DEFAULT_LOOK},log:[],nick:'',realmSeen:0,wkend:{},tags:[],pubWeekend:false,senior:false,pub:false,prof:{},sched:{}});
+const fresh=()=>({sect:null,school:null,schools:[],steps:{},look:{...DEFAULT_LOOK},log:[],nick:'',realmSeen:0,wkend:{},tags:[],pubWeekend:false,senior:false,pub:false,prof:{},sched:{"3":{"p9":"317"}}});
 const $=id=>document.getElementById(id);
 function h(tag,attrs,...kids){const e=document.createElement(tag);for(const k in attrs||{}){const v=attrs[k];if(v==null||v===false)continue;
     if(k==='class')e.className=v;else if(k.startsWith('on'))e[k]=v;else if(k==='html')e.innerHTML=v;else e.setAttribute(k,v);}
